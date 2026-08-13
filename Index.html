@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام توصيل الطلبات - السودان</title>
+    <!-- Leaflet CSS for map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: #f0f4f8;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+        }
+        h1 {
+            color: #1a3a5c;
+            text-align: center;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+        .grid-5 {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+        }
+        .role-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 25px 15px;
+            text-align: center;
+            border: 2px solid #e8edf3;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            position: relative;
+            overflow: hidden;
+        }
+        .role-card:hover {
+            transform: translateY(-8px);
+            border-color: #2b6c94;
+            box-shadow: 0 12px 28px rgba(43, 108, 148, 0.15);
+        }
+        .role-card:active {
+            transform: scale(0.97);
+        }
+        .role-icon {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+        .role-card h3 {
+            font-size: 1.2rem;
+            color: #1a3a5c;
+            margin-bottom: 4px;
+        }
+        .role-card p {
+            color: #64748b;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+        .role-badge {
+            display: inline-block;
+            background: #e8edf3;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            color: #475569;
+            margin-top: 8px;
+        }
+        .role-card .card-footer {
+            margin-top: 12px;
+            font-size: 0.8rem;
+            color: #2b6c94;
+            font-weight: 600;
+        }
+        /* تلوين مميز لكل قسم */
+        .role-card.store { border-top: 5px solid #2563eb; }
+        .role-card.pharmacy { border-top: 5px solid #16a34a; }
+        .role-card.restaurant { border-top: 5px solid #d97706; }
+        .role-card.driver { border-top: 5px solid #dc2626; }
+        .role-card.user { border-top: 5px solid #7c3aed; }
+
+        /* باقي الأنماط */
+        .hidden { display: none !important; }
+        .btn {
+            background: #2b6c94;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.2s;
+            width: 100%;
+            margin: 6px 0;
+            font-weight: 600;
+        }
+        .btn:hover { background: #1a4a6a; }
+        .btn-success { background: #2d7d46; }
+        .btn-success:hover { background: #1e5f34; }
+        .btn-danger { background: #b33c3c; }
+        .btn-danger:hover { background: #8a2a2a; }
+        .btn-warning { background: #b8860b; }
+        .btn-warning:hover { background: #8a6708; }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #2b6c94;
+            color: #2b6c94;
+        }
+        .btn-outline:hover { background: #2b6c94; color: white; }
+        .btn-purple { background: #7c3aed; }
+        .btn-purple:hover { background: #5b21b6; }
+
+        input, select, textarea, .file-input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #d1d9e6;
+            border-radius: 10px;
+            font-size: 16px;
+            background: #fafbfc;
+            transition: 0.2s;
+        }
+        input:focus, select:focus {
+            border-color: #2b6c94;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(43, 108, 148, 0.15);
+        }
+        .form-group { margin-bottom: 16px; }
+        label { font-weight: 600; display: block; margin-bottom: 5px; color: #1e293b; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+        .card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+        }
+        .flex { display: flex; gap: 10px; flex-wrap: wrap; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .mt-20 { margin-top: 20px; }
+        .mb-10 { margin-bottom: 10px; }
+        .map-container { height: 350px; border-radius: 12px; margin: 15px 0; }
+        .order-item {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border-right: 5px solid #2b6c94;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .order-item .meta { font-size: 14px; color: #64748b; }
+        .badge {
+            background: #2b6c94;
+            color: white;
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-success { background: #2d7d46; }
+        .badge-warning { background: #b8860b; }
+        .barcode-box {
+            text-align: center;
+            margin-top: 12px;
+            background: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px dashed #cbd5e1;
+        }
+        .barcode-box .barcode-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+        .section-title {
+            color: #1a3a5c;
+            border-bottom: 3px solid #2b6c94;
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+        }
+        .back-btn {
+            background: #e8edf3;
+            color: #1e293b;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .back-btn:hover { background: #cbd5e1; }
+        .store-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .store-card:hover { background: #f1f5f9; }
+        .store-card h4 { color: #1a3a5c; margin-bottom: 5px; }
+
+        @media (max-width: 992px) {
+            .grid-5 { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 600px) {
+            .grid-5 { grid-template-columns: 1fr 1fr; }
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            h1 { font-size: 1.6rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container" id="app">
+    <!-- ========== الشاشة الرئيسية ========== -->
+    <div id="mainScreen">
+        <h1>📦 نظام توصيل الطلبات</h1>
+        <p class="subtitle">جمهورية السودان - اختر القسم المناسب لك</p>
+        <div class="grid-5">
+            <!-- تاجر -->
+            <div class="role-card store" onclick="showLogin('store')">
+                <span class="role-icon">🏪</span>
+                <h3>تاجر</h3>
+                <p>إدارة المنتجات، استلام الطلبات، مسح الباركود</p>
+                <span class="role-badge">متجر</span>
+                <div class="card-footer">تسجيل الدخول →</div>
+            </div>
+            <!-- صيدلية -->
+            <div class="role-card pharmacy" onclick="showLogin('pharmacy')">
+                <span class="role-icon">💊</span>
+                <h3>صيدلي</h3>
+                <p>استلام طلبات الأدوية، روشتة، مسح الباركود</p>
+                <span class="role-badge">صيدلية</span>
+                <div class="card-footer">تسجيل الدخول →</div>
+            </div>
+            <!-- طباخ / مطعم -->
+            <div class="role-card restaurant" onclick="showLogin('restaurant')">
+                <span class="role-icon">🍽️</span>
+                <h3>طباخ</h3>
+                <p>استلام طلبات الوجبات، العصائر، الحلويات</p>
+                <span class="role-badge">مطعم</span>
+                <div class="card-footer">تسجيل الدخول →</div>
+            </div>
+            <!-- موصل طلبات -->
+            <div class="role-card driver" onclick="showLogin('driver')">
+                <span class="role-icon">🚗</span>
+                <h3>موصل طلبات</h3>
+                <p>استلام الطلبات، تتبع الموقع على الخريطة</p>
+                <span class="role-badge">توصيل</span>
+                <div class="card-footer">تسجيل الدخول →</div>
+            </div>
+            <!-- مستخدم (عميل) -->
+            <div class="role-card user" onclick="showLogin('user')">
+                <span class="role-icon">👤</span>
+                <h3>مستخدم</h3>
+                <p>طلب منتجات، أدوية، وجبات، وتتبع السائق</p>
+                <span class="role-badge">عميل</span>
+                <div class="card-footer">تسجيل الدخول →</div>
+            </div>
+        </div>
+        <div style="text-align:center; margin-top: 25px; padding-top: 20px; border-top: 1px solid #e8edf3;">
+            <span style="color: #94a3b8; font-size: 0.9rem;">🔐 نظام متكامل لتوصيل الطلبات حسب الولايات والمحليات السودانية</span>
+        </div>
+    </div>
+
+    <!-- ========== شاشة تسجيل الدخول / إنشاء حساب ========== -->
+    <div id="loginScreen" class="hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h2 id="loginTitle">تسجيل الدخول</h2>
+            <button class="back-btn" onclick="backToMain()">✕ رجوع</button>
+        </div>
+        <div id="loginForm">
+            <div class="form-group">
+                <label>البريد الإلكتروني</label>
+                <input type="email" id="loginEmail" placeholder="example@mail.com">
+            </div>
+            <div class="form-group">
+                <label>كلمة المرور</label>
+                <input type="password" id="loginPassword" placeholder="••••••••">
+            </div>
+            <button class="btn" onclick="handleLogin()">🚪 دخول</button>
+            <p style="margin-top:15px; text-align:center;">
+                ليس لديك حساب؟ <a href="#" onclick="showRegister()" style="color:#2b6c94; font-weight:600;">إنشاء حساب جديد</a>
+            </p>
+        </div>
+        <div id="registerForm" class="hidden">
+            <h3 style="margin-bottom:15px;">📝 إنشاء حساب جديد</h3>
+            <div id="registerFields"></div>
+            <button class="btn btn-success" onclick="handleRegister()">✅ تسجيل</button>
+            <button class="btn btn-outline" onclick="showLogin(currentSection)" style="margin-top:5px;">🔙 العودة لتسجيل الدخول</button>
+        </div>
+    </div>
+
+    <!-- ========== واجهة التاجر ========== -->
+    <div id="storeDashboard" class="hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h2>🏪 لوحة التاجر</h2>
+            <button class="back-btn" onclick="backToMain()">✕ خروج</button>
+        </div>
+        <div class="flex">
+            <button class="btn btn-success" onclick="addProduct()">➕ إضافة منتج</button>
+        </div>
+        <h3 class="section-title">🛒 المنتجات</h3>
+        <div id="storeProducts" class="grid-3"></div>
+        <h3 class="section-title mt-20">📋 طلبات المتجر</h3>
+        <div id="storeOrders"></div>
+    </div>
+
+    <!-- ========== واجهة الصيدلي ========== -->
+    <div id="pharmacyDashboard" class="hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h2>💊 لوحة الصيدلي</h2>
+            <button class="back-btn" onclick="backToMain()">✕ خروج</button>
+        </div>
+        <h3 class="section-title">📋 طلبات الصيدلية</h3>
+        <div id="pharmacyOrders"></div>
+    </div>
+
+    <!-- ========== واجهة الطباخ ========== -->
+    <div id="restaurantDashboard" class="hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h2>🍽️ لوحة الطباخ</h2>
+            <button class="back-btn" onclick="backToMain()">✕ خروج</button>
+        </div>
+        <h3 class="section-title">📋 طلبات المطعم</h3>
+        <div id="restaurantOrders"></div>
+    </div>
+
+    <!-- ========== واجهة الموصل ========== -->
+    <div id="driverDashboard" class="hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h2>🚗 لوحة الموصل</h2>
+            <button class="back-btn" onclick="backToMain()">✕ خروج</button>
+        </div>
+        <h3 class="section-title">📦 طلبات التوصيل</h3>
+        <div id="driverOrders"></div>
+        <h3 class="section-title">🗺️ تتبع الموقع</h3>
+        <div class="map-container" id="map"></div>
+    </div>
+
+    <!-- ========== واجهة المستخدم (العميل) ========== -->
+    <div id="userDashboard" class="hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h2>👤 لوحة المستخدم</h2>
+            <button class="back-btn" onclick="backToMain()">✕ خروج</button>
+        </div>
+        <div class="grid-2">
+            <div>
+                <h3 class="section-title">🏪 المتاجر القريبة</h3>
+                <div id="userStores"></div>
+            </div>
+            <div>
+                <h3 class="section-title">💊 الصيدليات</h3>
+                <div id="userPharmacies"></div>
+            </div>
+        </div>
+        <div>
+            <h3 class="section-title">🍽️ المطاعم</h3>
+            <div id="userRestaurants"></div>
+        </div>
+        <h3 class="section-title">📋 طلباتي</h3>
+        <div id="userOrders"></div>
+        <h3 class="section-title">🗺️ تتبع السائق</h3>
+        <div class="map-container" id="userMap"></div>
+    </div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/JsBarcode/3.11.5/JsBarcode.all.min.js"></script>
+<script>
+    // ---------- بيانات وهمية (محاكاة) ----------
+    const sudanStates = [
+        "الخرطوم", "الجزيرة", "النيل الأبيض", "النيل الأزرق", "كسلا", "القضارف", "سنار",
+        "شمال كردفان", "جنوب كردفان", "غرب كردفان", "شمال دارفور", "جنوب دارفور",
+        "غرب دارفور", "شرق دارفور", "وسط دارفور", "البحر الأحمر", "نهر النيل", "الشمالية"
+    ];
+    const localities = {
+        "الخرطوم": ["الخرطوم", "بحري", "أم درمان"],
+        "الجزيرة": ["مدني", "الحصاحيصا", "الكاملين"],
+        "النيل الأبيض": ["كوستي", "ربك", "الدويم"],
+        "النيل الأزرق": ["الدمازين", "الروصيرص", "باو"],
+        "كسلا": ["كسلا", "حلفا الجديدة", "أروما"],
+        "القضارف": ["القضارف", "الفاو", "البطانة"],
+        "سنار": ["سنار", "الدندر", "سنجة"],
+        "شمال كردفان": ["الأبيض", "بارا", "أم روابة"],
+        "جنوب كردفان": ["كادوقلي", "الدلنج", "أبو جبيهة"],
+        "غرب كردفان": ["النهود", "بابنوسة", "لقاوة"],
+        "شمال دارفور": ["الفاشر", "كتم", "مليط"],
+        "جنوب دارفور": ["نيالا", "كسلا", "راجا"],
+        "غرب دارفور": ["الجنينه", "زالنجي", "بندسي"],
+        "شرق دارفور": ["الضعين", "أبو كارنكا", "كسلا"],
+        "وسط دارفور": ["زالنجي", "وادي صالح", "أم دخن"],
+        "البحر الأحمر": ["بورتسودان", "سواكن", "حلايب"],
+        "نهر النيل": ["عطبرة", "شندي", "الدامر"],
+        "الشمالية": ["دنقلا", "مروي", "أبو حمد"]
+    };
+
+    // مستخدمين تجريبيين
+    let users = {
+        store: { email: 'store@test.com', password: '123', name: 'متجر السوق', address: 'الخرطوم-بحري' },
+        pharmacy: { email: 'pharma@test.com', password: '123', name: 'صيدلية النيل', address: 'الخرطوم-أم درمان' },
+        restaurant: { email: 'rest@test.com', password: '123', name: 'مطعم الأطباق', address: 'الخرطوم-الخرطوم' },
+        driver: { email: 'driver@test.com', password: '123', name: 'أحمد محمد', address: 'الخرطوم-بحري' },
+        user: { email: 'user@test.com', password: '123', name: 'مستخدم تجريبي', address: 'الخرطوم-الخرطوم' }
+    };
+
+    // بيانات الطلبات والمنتجات
+    let orders = [];
+    let userOrders = [];
+    let products = [
+        { id: 1, name: 'هاتف ذكي', price: 500, qty: 10, store: 'متجر السوق' },
+        { id: 2, name: 'سماعة بلوتوث', price: 80, qty: 25, store: 'متجر السوق' },
+        { id: 3, name: 'شاحن سريع', price: 30, qty: 15, store: 'متجر السوق' }
+    ];
+    let pharmacyOrders = [];
+    let restaurantOrders = [];
+    let pharmacies = [
+        { id: 1, name: 'صيدلية النيل', address: 'الخرطوم-أم درمان' },
+        { id: 2, name: 'صيدلية السلام', address: 'الخرطوم-بحري' }
+    ];
+    let restaurants = [
+        { id: 1, name: 'مطعم الأطباق', address: 'الخرطوم-الخرطوم' },
+        { id: 2, name: 'مطعم النيل', address: 'الخرطوم-بحري' }
+    ];
+
+    let currentUser = null;
+    let currentSection = null;
+    let mapInstance = null;
+    let userMapInstance = null;
+
+    // ---------- دوال رئيسية ----------
+    function backToMain() {
+        document.getElementById('mainScreen').classList.remove('hidden');
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('storeDashboard').classList.add('hidden');
+        document.getElementById('pharmacyDashboard').classList.add('hidden');
+        document.getElementById('restaurantDashboard').classList.add('hidden');
+        document.getElementById('driverDashboard').classList.add('hidden');
+        document.getElementById('userDashboard').classList.add('hidden');
+        if (mapInstance) { mapInstance.remove(); mapInstance = null; }
+        if (userMapInstance) { userMapInstance.remove(); userMapInstance = null; }
+        currentUser = null;
+        currentSection = null;
+    }
+
+    function showLogin(section) {
+        currentSection = section;
+        document.getElementById('mainScreen').classList.add('hidden');
+        document.getElementById('loginScreen').classList.remove('hidden');
+        document.getElementById('loginForm').classList.remove('hidden');
+        document.getElementById('registerForm').classList.add('hidden');
+        const names = { 
+            store: 'التاجر', 
+            pharmacy: 'الصيدلي', 
+            restaurant: 'الطباخ', 
+            driver: 'موصل الطلبات',
+            user: 'المستخدم'
+        };
+        document.getElementById('loginTitle').innerHTML = `🔑 تسجيل الدخول - ${names[section] || section}`;
+        document.getElementById('loginEmail').value = '';
+        document.getElementById('loginPassword').value = '';
+    }
+
+    function showRegister() {
+        document.getElementById('loginForm').classList.add('hidden');
+        document.getElementById('registerForm').classList.remove('hidden');
+        const fields = document.getElementById('registerFields');
+        let html = '';
+        const stateOptions = sudanStates.map(s => `<option value="${s}">${s}</option>`).join('');
+
+        if (currentSection === 'store') {
+            html = `
+                <div class="form-group"><label>الاسم الرباعي</label><input type="text" id="regName" placeholder="مثال: أحمد محمد علي"></div>
+                <div class="form-group"><label>رقم الهاتف</label><input type="text" id="regPhone" placeholder="09xxxxxxxx"></div>
+                <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="regEmail" placeholder="store@mail.com"></div>
+                <div class="form-group"><label>صورة الهوية (بطاقة قومية / جواز سفر)</label><input type="file" id="regId" class="file-input"></div>
+                <div class="form-group"><label>رخصة المحل</label><input type="file" id="regLicense" class="file-input"></div>
+                <div class="form-group"><label>عنوان المحل</label>
+                    <select id="regState" onchange="updateLocalities()"><option value="">اختر الولاية</option>${stateOptions}</select>
+                    <select id="regLocality" style="margin-top:8px;"><option value="">اختر المحلية</option></select>
+                </div>
+                <div class="form-group"><label>كلمة المرور</label><input type="password" id="regPass" placeholder="********"></div>
+                <div class="form-group"><label>إعادة كلمة المرور</label><input type="password" id="regPass2" placeholder="********"></div>
+            `;
+        } else if (currentSection === 'pharmacy') {
+            html = `
+                <div class="form-group"><label>الاسم الرباعي</label><input type="text" id="regName" placeholder="مثال: خالد عمر حسن"></div>
+                <div class="form-group"><label>رقم الهاتف</label><input type="text" id="regPhone" placeholder="09xxxxxxxx"></div>
+                <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="regEmail" placeholder="pharma@mail.com"></div>
+                <div class="form-group"><label>صورة الهوية (بطاقة قومية / جواز سفر)</label><input type="file" id="regId" class="file-input"></div>
+                <div class="form-group"><label>صورة الشهادة</label><input type="file" id="regCert" class="file-input"></div>
+                <div class="form-group"><label>رخصة الصيدلية</label><input type="file" id="regPharmLicense" class="file-input"></div>
+                <div class="form-group"><label>اسم الصيدلية</label><input type="text" id="regPharmName" placeholder="صيدلية النيل"></div>
+                <div class="form-group"><label>عنوان الصيدلية</label>
+                    <select id="regState" onchange="updateLocalities()"><option value="">اختر الولاية</option>${stateOptions}</select>
+                    <select id="regLocality" style="margin-top:8px;"><option value="">اختر المحلية</option></select>
+                </div>
+                <div class="form-group"><label>كلمة المرور</label><input type="password" id="regPass" placeholder="********"></div>
+                <div class="form-group"><label>إعادة كلمة المرور</label><input type="password" id="regPass2" placeholder="********"></div>
+            `;
+        } else if (currentSection === 'restaurant') {
+            html = `
+                <div class="form-group"><label>الاسم الرباعي</label><input type="text" id="regName" placeholder="مثال: مصطفى عبد الله"></div>
+                <div class="form-group"><label>رقم الهاتف</label><input type="text" id="regPhone" placeholder="09xxxxxxxx"></div>
+                <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="regEmail" placeholder="rest@mail.com"></div>
+                <div class="form-group"><label>صورة الهوية (بطاقة قومية / جواز سفر)</label><input type="file" id="regId" class="file-input"></div>
+                <div class="form-group"><label>عنوان المطعم</label>
+                    <select id="regState" onchange="updateLocalities()"><option value="">اختر الولاية</option>${stateOptions}</select>
+                    <select id="regLocality" style="margin-top:8px;"><option value="">اختر المحلية</option></select>
+                </div>
+                <div class="form-group"><label>كلمة المرور</label><input type="password" id="regPass" placeholder="********"></div>
+                <div class="form-group"><label>إعادة كلمة المرور</label><input type="password" id="regPass2" placeholder="********"></div>
+            `;
+        } else if (currentSection === 'driver') {
+            html = `
+                <div class="form-group"><label>الاسم الرباعي</label><input type="text" id="regName" placeholder="مثال: عمر أحمد محمد"></div>
+                <div class="form-group"><label>رقم الهاتف</label><input type="text" id="regPhone" placeholder="09xxxxxxxx"></div>
+                <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="regEmail" placeholder="driver@mail.com"></div>
+                <div class="form-group"><label>العنوان</label>
+                    <select id="regState" onchange="updateLocalities()"><option value="">اختر الولاية</option>${stateOptions}</select>
+                    <select id="regLocality" style="margin-top:8px;"><option value="">اختر المحلية</option></select>
+                </div>
+                <div class="form-group"><label>صورة الهوية (بطاقة قومية / جواز سفر)</label><input type="file" id="regId" class="file-input"></div>
+                <div class="form-group"><label>رخصة القيادة (سارية المفعول)</label><input type="file" id="regDriverLicense" class="file-input"></div>
+                <div class="form-group"><label>كلمة المرور</label><input type="password" id="regPass" placeholder="********"></div>
+                <div class="form-group"><label>إعادة كلمة المرور</label><input type="password" id="regPass2" placeholder="********"></div>
+            `;
+        } else if (currentSection === 'user') {
+            html = `
+                <div class="form-group"><label>الاسم الرباعي</label><input type="text" id="regName" placeholder="مثال: محمد عبد الله"></div>
+                <div class="form-group"><label>رقم الهاتف</label><input type="text" id="regPhone" placeholder="09xxxxxxxx"></div>
+                <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="regEmail" placeholder="user@mail.com"></div>
+                <div class="form-group"><label>العنوان</label>
+                    <select id="regState" onchange="updateLocalities()"><option value="">اختر الولاية</option>${stateOptions}</select>
+                    <select id="regLocality" style="margin-top:8px;"><option value="">اختر المحلية</option></select>
+                </div>
+                <div class="form-group"><label>صورة الهوية (بطاقة قومية / جواز سفر)</label><input type="file" id="regId" class="file-input"></div>
+                <div class="form-group"><label>كلمة المرور</label><input type="password" id="regPass" placeholder="********"></div>
+                <div class="form-group"><label>إعادة كلمة المرور</label><input type="password" id="regPass2" placeholder="********"></div>
+            `;
+        } else {
+            html = `<p style="color:red;">⚠️ هذا القسم غير متاح للتسجيل حالياً</p>`;
+        }
+        fields.innerHTML = html;
+        setTimeout(() => {
+            const stateSelect = document.getElementById('regState');
+            if (stateSelect) stateSelect.onchange = updateLocalities;
+        }, 100);
+    }
+
+    function updateLocalities() {
+        const state = document.getElementById('regState').value;
+        const localitySelect = document.getElementById('regLocality');
+        if (!localitySelect) return;
+        localitySelect.innerHTML = '<option value="">اختر المحلية</option>';
+        if (state && localities[state]) {
+            localities[state].forEach(l => {
+                localitySelect.innerHTML += `<option value="${l}">${l}</option>`;
+            });
+        }
+    }
+
+    function handleLogin() {
+        const email = document.getElementById('loginEmail').value.trim();
+        const pass = document.getElementById('loginPassword').value.trim();
+        let found = false;
+        for (let key in users) {
+            if (users[key].email === email && users[key].password === pass) {
+                currentUser = users[key];
+                currentUser.role = key;
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            alert('❌ البريد الإلكتروني أو كلمة المرور غير صحيحة');
+            return;
+        }
+        document.getElementById('loginScreen').classList.add('hidden');
+        if (currentUser.role === 'store') showStoreDashboard();
+        else if (currentUser.role === 'pharmacy') showPharmacyDashboard();
+        else if (currentUser.role === 'restaurant') showRestaurantDashboard();
+        else if (currentUser.role === 'driver') showDriverDashboard();
+        else if (currentUser.role === 'user') showUserDashboard();
+        else alert('دور غير معروف');
+    }
+
+    function handleRegister() {
+        const pass = document.getElementById('regPass')?.value;
+        const pass2 = document.getElementById('regPass2')?.value;
+        const email = document.getElementById('regEmail')?.value.trim();
+        const name = document.getElementById('regName')?.value.trim();
+        const phone = document.getElementById('regPhone')?.value.trim();
+        const state = document.getElementById('regState')?.value;
+        const locality = document.getElementById('regLocality')?.value;
+
+        if (!email || !pass) {
+            alert('⚠️ يرجى تعبئة البريد الإلكتروني وكلمة المرور');
+            return;
+        }
+        if (pass && pass2 && pass !== pass2) {
+            alert('❌ كلمة المرور غير متطابقة');
+            return;
+        }
+
+        // حفظ بيانات الحساب الجديد ضمن قسمه الحالي
+        users[currentSection] = {
+            email: email,
+            password: pass,
+            name: name || (users[currentSection]?.name ?? ''),
+            phone: phone || '',
+            address: (state && locality) ? `${state}-${locality}` : (users[currentSection]?.address ?? '')
+        };
+
+        alert('✅ تم إنشاء الحساب بنجاح، يمكنك الآن تسجيل الدخول');
+
+        // العودة لشاشة تسجيل الدخول مع تعبئة البريد الإلكتروني تلقائياً
+        showLogin(currentSection);
+        document.getElementById('loginEmail').value = email;
+    }
+
+    // ---------- لوحة التاجر ----------
+    function showStoreDashboard() {
+        document.getElementById('storeDashboard').classList.remove('hidden');
+        renderStoreProducts();
+        renderStoreOrders();
+    }
+
+    function renderStoreProducts() {
+        const div = document.getElementById('storeProducts');
+        if (products.length === 0) {
+            div.innerHTML = '<p style="color:#94a3b8;">لا توجد منتجات حالياً</p>';
+            return;
+        }
+        div.innerHTML = products.map(p => `
+            <div class="card">
+                <h4>${p.name}</h4>
+                <p>💰 السعر: ${p.price} ج.س</p>
+                <p>📦 الكمية: ${p.qty}</p>
+                <button class="btn btn-success" onclick="orderProduct(${p.id})">🛒 طلب</button>
+            </div>
+        `).join('');
+    }
+
+    function orderProduct(id) {
+        const p = products.find(x => x.id === id);
+        if (p && p.qty > 0) {
+            p.qty--;
+            const order = { 
+                id: Date.now(), 
+                product: p.name, 
+                qty: 1, 
+                address: currentUser?.address || 'الخرطوم-بحري', 
+                status: 'جديد',
+                type: 'منتج'
+            };
+            orders.push(order);
+            userOrders.push({...order, store: p.store});
+            renderStoreProducts();
+            renderStoreOrders();
+            alert('✅ تم إضافة الطلب بنجاح');
+        } else {
+            alert('⚠️ المنتج غير متوفر');
+        }
+    }
+
+    function renderStoreOrders() {
+        const div = document.getElementById('storeOrders');
+        if (orders.length === 0) {
+            div.innerHTML = '<p style="color:#94a3b8;">لا توجد طلبات</p>';
+            return;
+        }
+        div.innerHTML = orders.map(o => `
+            <div class="order-item">
+                <div class="flex-between">
+                    <strong>${o.product}</strong>
+                    <span class="badge">${o.status}</span>
+                </div>
+                <div class="meta">الكمية: ${o.qty} | العنوان: ${o.address}${o.store ? ` | 🏪 ${o.store}` : ''}</div>
+                <div class="flex" style="margin-top:10px;">
+                    <button class="btn btn-success" onclick="acceptOrder(${o.id})">✅ تأكيد الاستلام</button>
+                    <button class="btn btn-warning" onclick="scanBarcode(${o.id})">📱 مسح الباركود</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function acceptOrder(id) {
+        const o = orders.find(x => x.id === id);
+        if (o) { o.status = 'تم التأكيد - جاهز للاستلام'; alert('✅ تم تأكيد الطلب، بانتظار استلام الموصل'); renderStoreOrders(); }
+    }
+
+    function scanBarcode(id) {
+        alert('📱 تم مسح الباركود ومقارنة القائمة بنجاح (محاكاة)');
+    }
+
+    function addProduct() {
+        const name = prompt('اسم المنتج');
+        const price = parseFloat(prompt('السعر'));
+        const qty = parseInt(prompt('الكمية'));
+        if (name && price && qty) {
+            products.push({ id: Date.now(), name, price, qty, store: 'متجر السوق' });
+            renderStoreProducts();
+        }
+    }
+
+    // ---------- الصيدلي ----------
+    function showPharmacyDashboard() {
+        document.getElementById('pharmacyDashboard').classList.remove('hidden');
+        renderPharmacyOrders();
+    }
+
+    function renderPharmacyOrders() {
+        const div = document.getElementById('pharmacyOrders');
+        if (pharmacyOrders.length === 0) {
+            div.innerHTML = '<p style="color:#94a3b8;">لا توجد طلبات دواء حالية</p>';
+            return;
+        }
+        div.innerHTML = pharmacyOrders.map(o => `
+            <div class="order-item">
+                <div class="flex-between">
+                    <strong>💊 ${o.med}</strong>
+                    <span class="badge">${o.status}</span>
+                </div>
+                <div class="meta">الروشتة: <a href="#" style="color:#2b6c94;">📎 عرض الملف</a> | العنوان: ${o.address}${o.pharmacy ? ` | 💊 ${o.pharmacy}` : ''}</div>
+                <div class="flex" style="margin-top:10px;">
+                    <button class="btn btn-success" onclick="acceptPharmacyOrder(${o.id})">✅ تأكيد الاستلام</button>
+                    <button class="btn btn-warning" onclick="scanBarcode(${o.id})">📱 مسح الباركود</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function acceptPharmacyOrder(id) {
+        const o = pharmacyOrders.find(x => x.id === id);
+        if (o) { o.status = 'تم التأكيد - جاهز للاستلام'; alert('✅ تم تأكيد الطلب، بانتظار استلام الموصل'); renderPharmacyOrders(); }
+    }
+
+    // ---------- الطباخ ----------
+    function showRestaurantDashboard() {
+        document.getElementById('restaurantDashboard').classList.remove('hidden');
+        renderRestaurantOrders();
+    }
+
+    function renderRestaurantOrders() {
+        const div = document.getElementById('restaurantOrders');
+        if (restaurantOrders.length === 0) {
+            div.innerHTML = '<p style="color:#94a3b8;">لا توجد طلبات وجبات حالية</p>';
+            return;
+        }
+        div.innerHTML = restaurantOrders.map(o => `
+            <div class="order-item">
+                <div class="flex-between">
+                    <strong>🍽️ ${o.items}</strong>
+                    <span class="badge">${o.status}</span>
+                </div>
+                <div class="meta">العنوان: ${o.address}${o.restaurant ? ` | 🍽️ ${o.restaurant}` : ''}</div>
+                <div class="flex" style="margin-top:10px;">
+                    <button class="btn btn-success" onclick="acceptRestOrder(${o.id})">✅ تأكيد الاستلام</button>
+                    <button class="btn btn-warning" onclick="scanBarcode(${o.id})">📱 مسح الباركود</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function acceptRestOrder(id) {
+        const o = restaurantOrders.find(x => x.id === id);
+        if (o) { o.status = 'تم التأكيد - جاهز للاستلام'; alert('✅ تم تأكيد الطلب، بانتظار استلام الموصل'); renderRestaurantOrders(); }
+    }
+
+    // ---------- الموصل ----------
+    function showDriverDashboard() {
+        document.getElementById('driverDashboard').classList.remove('hidden');
+        renderDriverOrders();
+        initDriverMap();
+    }
+
+    // الحالة التي تعني أن التاجر/الصيدلي/الطباخ أكد الطلب وأصبح جاهزاً لاستلام الموصل
+    const CONFIRMED_STATUS = 'تم التأكيد - جاهز للاستلام';
+
+    function renderDriverOrders() {
+        const div = document.getElementById('driverOrders');
+        // الموصل يرى فقط الطلبات التي تم تأكيدها من التاجر/الصيدلي/الطباخ
+        // (أو التي استلمها هو مسبقاً وهي الآن قيد التوصيل)
+        let allOrders = [...orders, ...pharmacyOrders, ...restaurantOrders]
+            .filter(o => o.status === CONFIRMED_STATUS || o.status === 'قيد التوصيل');
+
+        if (allOrders.length === 0) {
+            div.innerHTML = '<p style="color:#94a3b8;">لا توجد طلبات جاهزة للاستلام حالياً</p>';
+            return;
+        }
+        div.innerHTML = allOrders.map(o => `
+            <div class="order-item">
+                <div class="flex-between">
+                    <strong>${o.product || o.med || o.items || 'طلب'}</strong>
+                    <span class="badge">${o.status || 'جديد'}</span>
+                </div>
+                <div class="meta">العنوان: ${o.address}</div>
+                ${o.status === 'قيد التوصيل'
+                    ? `<div class="barcode-box">
+                           <svg id="barcode-${o.id}"></svg>
+                           <div class="barcode-label">رمز الطلب: ${o.id}</div>
+                       </div>`
+                    : `<button class="btn btn-success" onclick="acceptDelivery(${o.id})">📦 استلام الطلب</button>`
+                }
+            </div>
+        `).join('');
+
+        // رسم باركود لكل طلب تم استلامه من الموصل
+        allOrders.forEach(o => {
+            if (o.status === 'قيد التوصيل') {
+                const el = document.getElementById(`barcode-${o.id}`);
+                if (el && window.JsBarcode) {
+                    JsBarcode(el, String(o.id), {
+                        format: 'CODE128',
+                        width: 2,
+                        height: 50,
+                        displayValue: false,
+                        margin: 5
+                    });
+                }
+            }
+        });
+    }
+
+    function acceptDelivery(id) {
+        let allOrders = [...orders, ...pharmacyOrders, ...restaurantOrders];
+        const order = allOrders.find(o => o.id === id);
+        if (order && order.status === CONFIRMED_STATUS) {
+            order.status = 'قيد التوصيل';
+        }
+        alert('✅ تم استلام الطلب للتوصيل - تم إنشاء باركود الطلب');
+        renderDriverOrders();
+    }
+
+    function initDriverMap() {
+        if (mapInstance) { mapInstance.remove(); mapInstance = null; }
+        mapInstance = L.map('map').setView([15.5, 32.5], 6);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstance);
+        L.marker([15.5, 32.5]).addTo(mapInstance).bindPopup('📍 موقع السائق');
+    }
+
+    // ---------- المستخدم (العميل) ----------
+    function showUserDashboard() {
+        document.getElementById('userDashboard').classList.remove('hidden');
+        renderUserStores();
+        renderUserPharmacies();
+        renderUserRestaurants();
+        renderUserOrders();
+        initUserMap();
+    }
+
+    function renderUserStores() {
+        const div = document.getElementById('userStores');
+        if (products.length === 0) {
+            div.innerHTML = '<p style="color:#94a3b8;">لا توجد متاجر قريبة</p>';
+            return;
+        }
+        div.innerHTML = products.map(p => `
+            <div class="store-card">
+                <div class="flex-between">
+                    <h4>${p.name}</h4>
+                    <span class="badge">${p.store || 'متجر'}</span>
+                </div>
+                <p>💰 ${p.price} ج.س | 📦 ${p.qty} متبقية</p>
+                <button class="btn btn-success" onclick="userOrderProduct(${p.id})" style="margin-top:5px;">🛒 طلب</button>
+            </div>
+        `).join('');
+    }
+
+    function userOrderProduct(id) {
+        const p = products.find(x => x.id === id);
+        if (p && p.qty > 0) {
+            p.qty--;
+            const order = {
+                id: Date.now(),
+                product: p.name,
+                qty: 1,
+                address: currentUser?.address || 'الخرطوم-بحري',
+                status: 'جديد',
+                type: 'منتج',
+                store: p.store || 'متجر'
+            };
+            orders.push(order);
+            userOrders.push(order);
+            renderUserOrders();
+            renderUserStores();
+            alert('✅ تم طلب المنتج بنجاح');
+        } else {
+            alert('⚠️ المنتج غير متوفر');
+        }
+    }
+
+    function renderUserPharmacies() {
+        const div = document.getElementById('userPharmacies');
+        if (pharmacies.length === 0) {
+            div.innerHTML = '<p style="color:#94a3b8;">لا توجد صيدليات قريبة</p>';
+            return;
+        }
+        div.innerHTML = pharmacies.map(ph => `
+            <div class="store-card">
+                <h4>💊 ${ph.name}</h4>
+                <p>📍 ${ph.address}</p>
+                <button class="btn btn-purple" onclick="userRequestPharmacy(${ph.id})" style="margin-top:5px;">💊 طلب دواء</button>
+            </div>
+        `).join('');
+    }
+
+    function userRequestPharmacy(pharmacyId) {
+        const ph = pharmacies.find(x => x.id === pharmacyId);
+        const med = prompt(`اسم الدواء المطلوب من ${ph ? ph.name : 'الصيدلية'}:`);
+        if (med) {
+            const order = {
+                id: Date.now(),
+                med: med,
+                address: currentUser?.address || 'الخرطوم-بحري',
+                status: 'جديد',
+                type: 'دواء',
+                pharmacy: ph ? ph.name : 'صيدلية',
+                pharmacyId: pharmacyId
+            };
+            pharmacyOrders.push(order);
+            userOrders.push({...order, med: med, name: med});
+            renderUserOrders();
+            alert(`✅ تم إرسال طلب الدواء إلى ${ph ? ph.name : 'الصيدلية'}`);
+        }
+    }
+
+    function renderUserRestaurants() {
+        const div = document.getElementById('userRestaurants');
+        if (restaurants.length === 0) {
+            div.innerHTML = '<p style="color:#94a3b8;">لا توجد مطاعم قريبة</p>';
+            return;
+        }
+        div.innerHTML = restaurants.map(r => `
+            <div class="store-card" style="display:inline-block; width:48%; margin:5px;">
+                <h4>🍽️ ${r.name}</h4>
+                <p>📍 ${r.address}</p>
+                <button class="btn btn-warning" onclick="userRequestRestaurant(${r.id})" style="margin-top:5px;">🍽️ طلب وجبة</button>
+            </div>
+        `).join('');
+    }
+
+    function userRequestRestaurant(restaurantId) {
+        const r = restaurants.find(x => x.id === restaurantId);
+        const items = prompt(`أدخل الأصناف المطلوبة من ${r ? r.name : 'المطعم'} (مثال: شاورما + عصير):`);
+        if (items) {
+            const order = {
+                id: Date.now(),
+                items: items,
+                address: currentUser?.address || 'الخرطوم-بحري',
+                status: 'جديد',
+                type: 'وجبة',
+                restaurant: r ? r.name : 'مطعم',
+                restaurantId: restaurantId
+            };
+            restaurantOrders.push(order);
+            userOrders.push({...order, items: items, name: items});
+            renderUserOrders();
+            alert(`✅ تم إرسال طلب الوجبة إلى ${r ? r.name : 'المطعم'}`);
+        }
+    }
+
+    function renderUserOrders() {
+        const div = document.getElementById('userOrders');
+        if (userOrders.length === 0) {
+            div.innerHTML = '<p style="color:#94a3b8;">لا توجد طلبات حالية</p>';
+            return;
+        }
+        div.innerHTML = userOrders.map(o => `
+            <div class="order-item">
+                <div class="flex-between">
+                    <strong>${o.product || o.med || o.items || 'طلب'}</strong>
+                    <span class="badge ${o.status === 'تم التسليم' ? 'badge-success' : ''}">${o.status || 'جديد'}</span>
+                </div>
+                <div class="meta">النوع: ${o.type || 'عام'} | العنوان: ${o.address}</div>
+            </div>
+        `).join('');
+    }
+
+    function initUserMap() {
+        if (userMapInstance) { userMapInstance.remove(); userMapInstance = null; }
+        userMapInstance = L.map('userMap').setView([15.5, 32.5], 6);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(userMapInstance);
+        L.marker([15.5, 32.5]).addTo(userMapInstance).bindPopup('📍 موقعك');
+        L.marker([15.8, 32.8]).addTo(userMapInstance).bindPopup('🚗 السائق في الطريق');
+    }
+
+    // ---------- بيانات تجريبية ----------
+    setTimeout(() => {
+        if (pharmacyOrders.length === 0) {
+            pharmacyOrders.push({ id: 101, med: 'بنادول', address: 'الخرطوم-بحري', status: 'جديد' });
+            pharmacyOrders.push({ id: 102, med: 'أموكسيسيلين', address: 'الخرطوم-أم درمان', status: 'جديد' });
+        }
+        if (restaurantOrders.length === 0) {
+            restaurantOrders.push({ id: 201, items: 'شاورما دجاج + عصير برتقال', address: 'الخرطوم-الخرطوم', status: 'جديد' });
+            restaurantOrders.push({ id: 202, items: 'فلافل + طحينة + عصير', address: 'الخرطوم-بحري', status: 'جديد' });
+        }
+    }, 500);
+</script>
+</body>
+</html>

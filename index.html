@@ -453,9 +453,9 @@
     let orders = [];
     let userOrders = [];
     let products = [
-        { id: 1, name: 'هاتف ذكي', price: 500, qty: 10, store: 'متجر السوق' },
-        { id: 2, name: 'سماعة بلوتوث', price: 80, qty: 25, store: 'متجر السوق' },
-        { id: 3, name: 'شاحن سريع', price: 30, qty: 15, store: 'متجر السوق' }
+        { id: 1, name: 'هاتف ذكي', price: 500, qty: 10, store: 'متجر السوق', storeId: 1 },
+        { id: 2, name: 'سماعة بلوتوث', price: 80, qty: 25, store: 'متجر السوق', storeId: 1 },
+        { id: 3, name: 'شاحن سريع', price: 30, qty: 15, store: 'متجر السوق', storeId: 1 }
     ];
     let pharmacyOrders = [];
     let restaurantOrders = [];
@@ -1106,11 +1106,16 @@
 
     function renderUserStores() {
         const div = document.getElementById('userStores');
-        if (products.length === 0) {
-            div.innerHTML = '<p style="color:#94a3b8;">لا توجد متاجر قريبة</p>';
+        // عرض منتجات المتاجر الموجودة في نفس عنوان المستخدم فقط
+        const userAddress = (currentUser?.address || '').trim();
+        const nearbyStoreIds = stores.filter(s => s.address === userAddress).map(s => s.id);
+        const filteredProducts = products.filter(p => nearbyStoreIds.includes(p.storeId));
+
+        if (filteredProducts.length === 0) {
+            div.innerHTML = '<p style="color:#94a3b8;">لا توجد متاجر في نفس عنوانك حالياً</p>';
             return;
         }
-        div.innerHTML = products.map(p => `
+        div.innerHTML = filteredProducts.map(p => `
             <div class="store-card">
                 <div class="flex-between">
                     <h4>${p.name}</h4>
@@ -1148,11 +1153,15 @@
 
     function renderUserPharmacies() {
         const div = document.getElementById('userPharmacies');
-        if (pharmacies.length === 0) {
-            div.innerHTML = '<p style="color:#94a3b8;">لا توجد صيدليات قريبة</p>';
+        // عرض الصيدليات الموجودة في نفس عنوان المستخدم فقط
+        const userAddress = (currentUser?.address || '').trim();
+        const filteredPharmacies = pharmacies.filter(ph => ph.address === userAddress);
+
+        if (filteredPharmacies.length === 0) {
+            div.innerHTML = '<p style="color:#94a3b8;">لا توجد صيدليات في نفس عنوانك حالياً</p>';
             return;
         }
-        div.innerHTML = pharmacies.map(ph => `
+        div.innerHTML = filteredPharmacies.map(ph => `
             <div class="store-card">
                 <h4>💊 ${ph.name}</h4>
                 <p>📍 ${ph.address}</p>
@@ -1184,11 +1193,15 @@
 
     function renderUserRestaurants() {
         const div = document.getElementById('userRestaurants');
-        if (restaurants.length === 0) {
-            div.innerHTML = '<p style="color:#94a3b8;">لا توجد مطاعم قريبة</p>';
+        // عرض المطاعم الموجودة في نفس عنوان المستخدم فقط
+        const userAddress = (currentUser?.address || '').trim();
+        const filteredRestaurants = restaurants.filter(r => r.address === userAddress);
+
+        if (filteredRestaurants.length === 0) {
+            div.innerHTML = '<p style="color:#94a3b8;">لا توجد مطاعم في نفس عنوانك حالياً</p>';
             return;
         }
-        div.innerHTML = restaurants.map(r => `
+        div.innerHTML = filteredRestaurants.map(r => `
             <div class="store-card" style="display:inline-block; width:48%; margin:5px;">
                 <h4>🍽️ ${r.name}</h4>
                 <p>📍 ${r.address}</p>

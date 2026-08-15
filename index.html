@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام توصيل الطلبات - السودان</title>
+    <!-- Leaflet CSS for map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <style>
         * {
@@ -96,12 +97,14 @@
             color: #2b6c94;
             font-weight: 600;
         }
+        /* تلوين مميز لكل قسم */
         .role-card.store { border-top: 5px solid #2563eb; }
         .role-card.pharmacy { border-top: 5px solid #16a34a; }
         .role-card.restaurant { border-top: 5px solid #d97706; }
         .role-card.driver { border-top: 5px solid #dc2626; }
         .role-card.user { border-top: 5px solid #7c3aed; }
 
+        /* باقي الأنماط */
         .hidden { display: none !important; }
         .btn {
             background: #2b6c94;
@@ -131,13 +134,6 @@
         .btn-outline:hover { background: #2b6c94; color: white; }
         .btn-purple { background: #7c3aed; }
         .btn-purple:hover { background: #5b21b6; }
-        .btn-sm {
-            padding: 8px 16px;
-            font-size: 14px;
-            width: auto;
-        }
-        .btn-danger { background: #dc2626; }
-        .btn-danger:hover { background: #b91c1c; }
 
         input, select, textarea, .file-input {
             width: 100%;
@@ -188,7 +184,6 @@
         }
         .badge-success { background: #2d7d46; }
         .badge-warning { background: #b8860b; }
-        .badge-danger { background: #dc2626; }
         .barcode-box {
             text-align: center;
             margin-top: 12px;
@@ -230,29 +225,6 @@
         }
         .store-card:hover { background: #f1f5f9; }
         .store-card h4 { color: #1a3a5c; margin-bottom: 5px; }
-        .camera-container {
-            background: #000;
-            border-radius: 12px;
-            overflow: hidden;
-            margin: 10px 0;
-            position: relative;
-        }
-        .camera-container video {
-            width: 100%;
-            max-height: 400px;
-            background: #000;
-        }
-        .camera-container .overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            border: 3px solid rgba(255, 255, 255, 0.5);
-            width: 70%;
-            height: 60%;
-            border-radius: 20px;
-            pointer-events: none;
-        }
 
         @media (max-width: 992px) {
             .grid-5 { grid-template-columns: repeat(3, 1fr); }
@@ -271,6 +243,7 @@
         <h1>📦 نظام توصيل الطلبات</h1>
         <p class="subtitle">جمهورية السودان - اختر القسم المناسب لك</p>
         <div class="grid-5">
+            <!-- تاجر -->
             <div class="role-card store" onclick="showLogin('store')">
                 <span class="role-icon">🏪</span>
                 <h3>تاجر</h3>
@@ -278,6 +251,7 @@
                 <span class="role-badge">متجر</span>
                 <div class="card-footer">تسجيل الدخول →</div>
             </div>
+            <!-- صيدلية -->
             <div class="role-card pharmacy" onclick="showLogin('pharmacy')">
                 <span class="role-icon">💊</span>
                 <h3>صيدلي</h3>
@@ -285,6 +259,7 @@
                 <span class="role-badge">صيدلية</span>
                 <div class="card-footer">تسجيل الدخول →</div>
             </div>
+            <!-- طباخ / مطعم -->
             <div class="role-card restaurant" onclick="showLogin('restaurant')">
                 <span class="role-icon">🍽️</span>
                 <h3>طباخ</h3>
@@ -292,6 +267,7 @@
                 <span class="role-badge">مطعم</span>
                 <div class="card-footer">تسجيل الدخول →</div>
             </div>
+            <!-- موصل طلبات -->
             <div class="role-card driver" onclick="showLogin('driver')">
                 <span class="role-icon">🚗</span>
                 <h3>موصل طلبات</h3>
@@ -299,6 +275,7 @@
                 <span class="role-badge">توصيل</span>
                 <div class="card-footer">تسجيل الدخول →</div>
             </div>
+            <!-- مستخدم (عميل) -->
             <div class="role-card user" onclick="showLogin('user')">
                 <span class="role-icon">👤</span>
                 <h3>مستخدم</h3>
@@ -312,7 +289,7 @@
         </div>
     </div>
 
-    <!-- ========== شاشة تسجيل الدخول ========== -->
+    <!-- ========== شاشة تسجيل الدخول / إنشاء حساب ========== -->
     <div id="loginScreen" class="hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <h2 id="loginTitle">تسجيل الدخول</h2>
@@ -343,8 +320,14 @@
     <!-- ========== واجهة التاجر ========== -->
     <div id="storeDashboard" class="hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2>🏪 لوحة التاجر</h2>
+            <div>
+                <h2>🏪 لوحة التاجر</h2>
+                <p id="storeInfo" style="color:#64748b; margin-top:5px;"></p>
+            </div>
             <button class="back-btn" onclick="backToMain()">✕ خروج</button>
+        </div>
+        <div style="background:#e8f4f8; padding:15px; border-radius:10px; margin-bottom:20px; border-right:4px solid #2563eb;">
+            <strong>ℹ️ ملاحظة مهمة:</strong> يتم عرض الطلبات من العملاء في نفس محليتك فقط
         </div>
         <div class="flex">
             <button class="btn btn-success" onclick="addProduct()">➕ إضافة منتج</button>
@@ -353,54 +336,38 @@
         <div id="storeProducts" class="grid-3"></div>
         <h3 class="section-title mt-20">📋 طلبات المتجر</h3>
         <div id="storeOrders"></div>
-        <!-- كاميرا مسح الباركود -->
-        <div id="storeScanner" class="hidden">
-            <h3 class="section-title">📱 مسح الباركود</h3>
-            <div id="storeCameraContainer" class="camera-container">
-                <div id="storeReader"></div>
-                <div class="overlay"></div>
-            </div>
-            <button class="btn btn-danger btn-sm" onclick="closeScanner('store')">✕ إغلاق الكاميرا</button>
-            <div id="storeScanResult" style="margin-top:10px;"></div>
-        </div>
     </div>
 
     <!-- ========== واجهة الصيدلي ========== -->
     <div id="pharmacyDashboard" class="hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2>💊 لوحة الصيدلي</h2>
+            <div>
+                <h2>💊 لوحة الصيدلي</h2>
+                <p id="pharmacyInfo" style="color:#64748b; margin-top:5px;"></p>
+            </div>
             <button class="back-btn" onclick="backToMain()">✕ خروج</button>
+        </div>
+        <div style="background:#e8f4f8; padding:15px; border-radius:10px; margin-bottom:20px; border-right:4px solid #16a34a;">
+            <strong>ℹ️ ملاحظة مهمة:</strong> يتم عرض الطلبات من العملاء في نفس محليتك فقط
         </div>
         <h3 class="section-title">📋 طلبات الصيدلية</h3>
         <div id="pharmacyOrders"></div>
-        <div id="pharmacyScanner" class="hidden">
-            <h3 class="section-title">📱 مسح الباركود</h3>
-            <div id="pharmacyCameraContainer" class="camera-container">
-                <div id="pharmacyReader"></div>
-                <div class="overlay"></div>
-            </div>
-            <button class="btn btn-danger btn-sm" onclick="closeScanner('pharmacy')">✕ إغلاق الكاميرا</button>
-            <div id="pharmacyScanResult" style="margin-top:10px;"></div>
-        </div>
     </div>
 
     <!-- ========== واجهة الطباخ ========== -->
     <div id="restaurantDashboard" class="hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2>🍽️ لوحة الطباخ</h2>
+            <div>
+                <h2>🍽️ لوحة الطباخ</h2>
+                <p id="restaurantInfo" style="color:#64748b; margin-top:5px;"></p>
+            </div>
             <button class="back-btn" onclick="backToMain()">✕ خروج</button>
+        </div>
+        <div style="background:#e8f4f8; padding:15px; border-radius:10px; margin-bottom:20px; border-right:4px solid #d97706;">
+            <strong>ℹ️ ملاحظة مهمة:</strong> يتم عرض الطلبات من العملاء في نفس محليتك فقط
         </div>
         <h3 class="section-title">📋 طلبات المطعم</h3>
         <div id="restaurantOrders"></div>
-        <div id="restaurantScanner" class="hidden">
-            <h3 class="section-title">📱 مسح الباركود</h3>
-            <div id="restaurantCameraContainer" class="camera-container">
-                <div id="restaurantReader"></div>
-                <div class="overlay"></div>
-            </div>
-            <button class="btn btn-danger btn-sm" onclick="closeScanner('restaurant')">✕ إغلاق الكاميرا</button>
-            <div id="restaurantScanResult" style="margin-top:10px;"></div>
-        </div>
     </div>
 
     <!-- ========== واجهة الموصل ========== -->
@@ -413,18 +380,9 @@
         <div id="driverOrders"></div>
         <h3 class="section-title">🗺️ تتبع الموقع</h3>
         <div class="map-container" id="map"></div>
-        <div id="driverScanner" class="hidden">
-            <h3 class="section-title">📱 مسح الباركود للتسليم</h3>
-            <div id="driverCameraContainer" class="camera-container">
-                <div id="driverReader"></div>
-                <div class="overlay"></div>
-            </div>
-            <button class="btn btn-danger btn-sm" onclick="closeScanner('driver')">✕ إغلاق الكاميرا</button>
-            <div id="driverScanResult" style="margin-top:10px;"></div>
-        </div>
     </div>
 
-    <!-- ========== واجهة المستخدم ========== -->
+    <!-- ========== واجهة المستخدم (العميل) ========== -->
     <div id="userDashboard" class="hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <h2>👤 لوحة المستخدم</h2>
@@ -451,9 +409,9 @@
     </div>
 </div>
 
+<!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/JsBarcode/3.11.5/JsBarcode.all.min.js"></script>
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script>
     // ---------- بيانات وهمية (محاكاة) ----------
     const sudanStates = [
@@ -482,86 +440,45 @@
         "الشمالية": ["دنقلا", "مروي", "أبو حمد"]
     };
 
-    // مستخدمين تجريبيين مع تحديد المحلية
+    // مستخدمين تجريبيين
     let users = {
-        store: { email: 'store@test.com', password: '123', name: 'متجر السوق', address: 'الخرطوم-بحري', locality: 'بحري' },
-        pharmacy: { email: 'pharma@test.com', password: '123', name: 'صيدلية النيل', address: 'الخرطوم-أم درمان', locality: 'أم درمان' },
-        restaurant: { email: 'rest@test.com', password: '123', name: 'مطعم الأطباق', address: 'الخرطوم-الخرطوم', locality: 'الخرطوم' },
-        driver: { email: 'driver@test.com', password: '123', name: 'أحمد محمد', address: 'الخرطوم-بحري', locality: 'بحري' },
-        user: { email: 'user@test.com', password: '123', name: 'مستخدم تجريبي', address: 'الخرطوم-الخرطوم', locality: 'الخرطوم' }
+        store: { email: 'store@test.com', password: '123', name: 'متجر السوق', address: 'الخرطوم-بحري', storeId: 1 },
+        pharmacy: { email: 'pharma@test.com', password: '123', name: 'صيدلية النيل', address: 'الخرطوم-أم درمان', pharmacyId: 1 },
+        restaurant: { email: 'rest@test.com', password: '123', name: 'مطعم الأطباق', address: 'الخرطوم-الخرطوم', restaurantId: 1 },
+        driver: { email: 'driver@test.com', password: '123', name: 'أحمد محمد', address: 'الخرطوم-بحري' },
+        user: { email: 'user@test.com', password: '123', name: 'مستخدم تجريبي', address: 'الخرطوم-الخرطوم' }
     };
 
-    // بيانات الطلبات مع تحديد المحلية والمكان
+    // بيانات الطلبات والمنتجات
     let orders = [];
     let userOrders = [];
     let products = [
-        { id: 1, name: 'هاتف ذكي', price: 500, qty: 10, store: 'متجر السوق', address: 'الخرطوم-بحري', locality: 'بحري' },
-        { id: 2, name: 'سماعة بلوتوث', price: 80, qty: 25, store: 'متجر السوق', address: 'الخرطوم-بحري', locality: 'بحري' },
-        { id: 3, name: 'شاحن سريع', price: 30, qty: 15, store: 'متجر السوق', address: 'الخرطوم-بحري', locality: 'بحري' }
+        { id: 1, name: 'هاتف ذكي', price: 500, qty: 10, store: 'متجر السوق' },
+        { id: 2, name: 'سماعة بلوتوث', price: 80, qty: 25, store: 'متجر السوق' },
+        { id: 3, name: 'شاحن سريع', price: 30, qty: 15, store: 'متجر السوق' }
     ];
     let pharmacyOrders = [];
     let restaurantOrders = [];
     let pharmacies = [
-        { id: 1, name: 'صيدلية النيل', address: 'الخرطوم-أم درمان', locality: 'أم درمان' },
-        { id: 2, name: 'صيدلية السلام', address: 'الخرطوم-بحري', locality: 'بحري' }
+        { id: 1, name: 'صيدلية النيل', address: 'الخرطوم-أم درمان' },
+        { id: 2, name: 'صيدلية السلام', address: 'الخرطوم-بحري' },
+        { id: 3, name: 'صيدلية الشفاء', address: 'الخرطوم-الخرطوم' }
+    ];
+    let stores = [
+        { id: 1, name: 'متجر السوق', address: 'الخرطوم-بحري' },
+        { id: 2, name: 'متجر الأسواق', address: 'الخرطوم-أم درمان' },
+        { id: 3, name: 'متجر الشرق', address: 'الخرطوم-الخرطوم' }
     ];
     let restaurants = [
-        { id: 1, name: 'مطعم الأطباق', address: 'الخرطوم-الخرطوم', locality: 'الخرطوم' },
-        { id: 2, name: 'مطعم النيل', address: 'الخرطوم-بحري', locality: 'بحري' }
+        { id: 1, name: 'مطعم الأطباق', address: 'الخرطوم-الخرطوم' },
+        { id: 2, name: 'مطعم النيل', address: 'الخرطوم-بحري' },
+        { id: 3, name: 'مطعم الفردوس', address: 'الخرطوم-أم درمان' }
     ];
 
     let currentUser = null;
     let currentSection = null;
     let mapInstance = null;
     let userMapInstance = null;
-    let html5QrCodeInstances = {};
-
-    // مفتاح تشفير بسيط للباركود
-    const ENCRYPTION_KEY = 'SUDAN_DELIVERY_2024';
-
-    // ---------- دوال التشفير وفك التشفير ----------
-    function encryptData(data) {
-        let encrypted = '';
-        for (let i = 0; i < data.length; i++) {
-            encrypted += String.fromCharCode(data.charCodeAt(i) ^ ENCRYPTION_KEY.charCodeAt(i % ENCRYPTION_KEY.length));
-        }
-        return btoa(encrypted);
-    }
-
-    function decryptData(encrypted) {
-        try {
-            const decoded = atob(encrypted);
-            let decrypted = '';
-            for (let i = 0; i < decoded.length; i++) {
-                decrypted += String.fromCharCode(decoded.charCodeAt(i) ^ ENCRYPTION_KEY.charCodeAt(i % ENCRYPTION_KEY.length));
-            }
-            return decrypted;
-        } catch (e) {
-            return null;
-        }
-    }
-
-    function generateOrderBarcode(order) {
-        // تشفير بيانات الطلب في باركود
-        const data = JSON.stringify({
-            id: order.id,
-            items: order.product || order.med || order.items || 'طلب',
-            address: order.address,
-            status: order.status
-        });
-        return encryptData(data);
-    }
-
-    function verifyBarcode(encryptedData, order) {
-        const decrypted = decryptData(encryptedData);
-        if (!decrypted) return false;
-        try {
-            const data = JSON.parse(decrypted);
-            return data.id === order.id;
-        } catch (e) {
-            return false;
-        }
-    }
 
     // ---------- دوال رئيسية ----------
     function backToMain() {
@@ -574,31 +491,8 @@
         document.getElementById('userDashboard').classList.add('hidden');
         if (mapInstance) { mapInstance.remove(); mapInstance = null; }
         if (userMapInstance) { userMapInstance.remove(); userMapInstance = null; }
-        closeAllScanners();
         currentUser = null;
         currentSection = null;
-    }
-
-    function closeAllScanners() {
-        ['store', 'pharmacy', 'restaurant', 'driver'].forEach(role => {
-            if (html5QrCodeInstances[role]) {
-                try { html5QrCodeInstances[role].stop(); } catch(e) {}
-                try { html5QrCodeInstances[role].clear(); } catch(e) {}
-                delete html5QrCodeInstances[role];
-            }
-            document.getElementById(role + 'Scanner').classList.add('hidden');
-            document.getElementById(role + 'ScanResult').innerHTML = '';
-        });
-    }
-
-    function closeScanner(role) {
-        if (html5QrCodeInstances[role]) {
-            try { html5QrCodeInstances[role].stop(); } catch(e) {}
-            try { html5QrCodeInstances[role].clear(); } catch(e) {}
-            delete html5QrCodeInstances[role];
-        }
-        document.getElementById(role + 'Scanner').classList.add('hidden');
-        document.getElementById(role + 'ScanResult').innerHTML = '';
     }
 
     function showLogin(section) {
@@ -631,7 +525,7 @@
                 <div class="form-group"><label>الاسم الرباعي</label><input type="text" id="regName" placeholder="مثال: أحمد محمد علي"></div>
                 <div class="form-group"><label>رقم الهاتف</label><input type="text" id="regPhone" placeholder="09xxxxxxxx"></div>
                 <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="regEmail" placeholder="store@mail.com"></div>
-                <div class="form-group"><label>صورة الهوية</label><input type="file" id="regId" class="file-input"></div>
+                <div class="form-group"><label>صورة الهوية (بطاقة قومية / جواز سفر)</label><input type="file" id="regId" class="file-input"></div>
                 <div class="form-group"><label>رخصة المحل</label><input type="file" id="regLicense" class="file-input"></div>
                 <div class="form-group"><label>عنوان المحل</label>
                     <select id="regState" onchange="updateLocalities()"><option value="">اختر الولاية</option>${stateOptions}</select>
@@ -645,7 +539,7 @@
                 <div class="form-group"><label>الاسم الرباعي</label><input type="text" id="regName" placeholder="مثال: خالد عمر حسن"></div>
                 <div class="form-group"><label>رقم الهاتف</label><input type="text" id="regPhone" placeholder="09xxxxxxxx"></div>
                 <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="regEmail" placeholder="pharma@mail.com"></div>
-                <div class="form-group"><label>صورة الهوية</label><input type="file" id="regId" class="file-input"></div>
+                <div class="form-group"><label>صورة الهوية (بطاقة قومية / جواز سفر)</label><input type="file" id="regId" class="file-input"></div>
                 <div class="form-group"><label>صورة الشهادة</label><input type="file" id="regCert" class="file-input"></div>
                 <div class="form-group"><label>رخصة الصيدلية</label><input type="file" id="regPharmLicense" class="file-input"></div>
                 <div class="form-group"><label>اسم الصيدلية</label><input type="text" id="regPharmName" placeholder="صيدلية النيل"></div>
@@ -661,7 +555,7 @@
                 <div class="form-group"><label>الاسم الرباعي</label><input type="text" id="regName" placeholder="مثال: مصطفى عبد الله"></div>
                 <div class="form-group"><label>رقم الهاتف</label><input type="text" id="regPhone" placeholder="09xxxxxxxx"></div>
                 <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="regEmail" placeholder="rest@mail.com"></div>
-                <div class="form-group"><label>صورة الهوية</label><input type="file" id="regId" class="file-input"></div>
+                <div class="form-group"><label>صورة الهوية (بطاقة قومية / جواز سفر)</label><input type="file" id="regId" class="file-input"></div>
                 <div class="form-group"><label>عنوان المطعم</label>
                     <select id="regState" onchange="updateLocalities()"><option value="">اختر الولاية</option>${stateOptions}</select>
                     <select id="regLocality" style="margin-top:8px;"><option value="">اختر المحلية</option></select>
@@ -678,8 +572,8 @@
                     <select id="regState" onchange="updateLocalities()"><option value="">اختر الولاية</option>${stateOptions}</select>
                     <select id="regLocality" style="margin-top:8px;"><option value="">اختر المحلية</option></select>
                 </div>
-                <div class="form-group"><label>صورة الهوية</label><input type="file" id="regId" class="file-input"></div>
-                <div class="form-group"><label>رخصة القيادة</label><input type="file" id="regDriverLicense" class="file-input"></div>
+                <div class="form-group"><label>صورة الهوية (بطاقة قومية / جواز سفر)</label><input type="file" id="regId" class="file-input"></div>
+                <div class="form-group"><label>رخصة القيادة (سارية المفعول)</label><input type="file" id="regDriverLicense" class="file-input"></div>
                 <div class="form-group"><label>كلمة المرور</label><input type="password" id="regPass" placeholder="********"></div>
                 <div class="form-group"><label>إعادة كلمة المرور</label><input type="password" id="regPass2" placeholder="********"></div>
             `;
@@ -692,7 +586,7 @@
                     <select id="regState" onchange="updateLocalities()"><option value="">اختر الولاية</option>${stateOptions}</select>
                     <select id="regLocality" style="margin-top:8px;"><option value="">اختر المحلية</option></select>
                 </div>
-                <div class="form-group"><label>صورة الهوية</label><input type="file" id="regId" class="file-input"></div>
+                <div class="form-group"><label>صورة الهوية (بطاقة قومية / جواز سفر)</label><input type="file" id="regId" class="file-input"></div>
                 <div class="form-group"><label>كلمة المرور</label><input type="password" id="regPass" placeholder="********"></div>
                 <div class="form-group"><label>إعادة كلمة المرور</label><input type="password" id="regPass2" placeholder="********"></div>
             `;
@@ -761,174 +655,33 @@
             return;
         }
 
+        // حفظ بيانات الحساب الجديد ضمن قسمه الحالي
         users[currentSection] = {
             email: email,
             password: pass,
             name: name || (users[currentSection]?.name ?? ''),
             phone: phone || '',
-            address: (state && locality) ? `${state}-${locality}` : (users[currentSection]?.address ?? ''),
-            locality: locality || (users[currentSection]?.locality ?? '')
+            address: (state && locality) ? `${state}-${locality}` : (users[currentSection]?.address ?? '')
         };
 
         alert('✅ تم إنشاء الحساب بنجاح، يمكنك الآن تسجيل الدخول');
+
+        // العودة لشاشة تسجيل الدخول مع تعبئة البريد الإلكتروني تلقائياً
         showLogin(currentSection);
         document.getElementById('loginEmail').value = email;
-    }
-
-    // ---------- دوال مسح الباركود ----------
-    function startScanner(role, orderId) {
-        const scannerDiv = document.getElementById(role + 'Scanner');
-        scannerDiv.classList.remove('hidden');
-        
-        // إخفاء نتيجة المسح السابقة
-        document.getElementById(role + 'ScanResult').innerHTML = '';
-        
-        // إيقاف أي ماسح سابق
-        if (html5QrCodeInstances[role]) {
-            try { html5QrCodeInstances[role].stop(); } catch(e) {}
-            try { html5QrCodeInstances[role].clear(); } catch(e) {}
-        }
-
-        const readerId = role + 'Reader';
-        const containerId = role + 'CameraContainer';
-        
-        // إنشاء ماسح جديد
-        try {
-            html5QrCodeInstances[role] = new Html5Qrcode(readerId);
-            
-            // إضافة بعض الإعدادات لتحسين المسح
-            const config = {
-                fps: 20,
-                qrbox: { width: 250, height: 250 },
-                aspectRatio: 1.0
-            };
-
-            html5QrCodeInstances[role].start(
-                { facingMode: "environment" },
-                config,
-                (decodedText) => {
-                    // معالجة نتيجة المسح
-                    handleScanResult(role, decodedText, orderId);
-                },
-                (error) => {
-                    // تجاهل أخطاء المسح العادية
-                    // console.log(error);
-                }
-            );
-        } catch (err) {
-            alert('⚠️ لا يمكن الوصول إلى الكاميرا. تأكد من منح الإذن.');
-            console.error(err);
-            closeScanner(role);
-        }
-    }
-
-    function handleScanResult(role, decodedText, orderId) {
-        // إيقاف الماسح بعد قراءة ناجحة
-        if (html5QrCodeInstances[role]) {
-            try { html5QrCodeInstances[role].stop(); } catch(e) {}
-        }
-        
-        const resultDiv = document.getElementById(role + 'ScanResult');
-        
-        // البحث عن الطلب
-        let allOrders = [];
-        if (role === 'store') allOrders = orders;
-        else if (role === 'pharmacy') allOrders = pharmacyOrders;
-        else if (role === 'restaurant') allOrders = restaurantOrders;
-        else if (role === 'driver') {
-            // للموصل: نبحث في جميع الطلبات التي بحالة "قيد التوصيل"
-            allOrders = [...orders, ...pharmacyOrders, ...restaurantOrders]
-                .filter(o => o.status === 'قيد التوصيل');
-        }
-
-        // محاولة فك تشفير الباركود
-        const decrypted = decryptData(decodedText);
-        let foundOrder = null;
-        let matched = false;
-
-        if (decrypted) {
-            try {
-                const data = JSON.parse(decrypted);
-                // البحث عن طلب مطابق
-                foundOrder = allOrders.find(o => o.id === data.id);
-                if (foundOrder) {
-                    matched = true;
-                }
-            } catch (e) {
-                // البيانات غير صالحة
-            }
-        }
-
-        if (matched && foundOrder) {
-            // التحقق من تطابق قائمة الطلبات
-            if (role === 'driver') {
-                // الموصل: تأكيد تسليم الطلب
-                foundOrder.status = 'تم التسليم';
-                resultDiv.innerHTML = `
-                    <div style="background:#d1fae5; padding:15px; border-radius:10px; text-align:center;">
-                        <span style="font-size:2rem;">✅</span>
-                        <h4>تم تأكيد تسليم الطلب بنجاح!</h4>
-                        <p>الطلب: ${foundOrder.product || foundOrder.med || foundOrder.items || 'طلب'}</p>
-                        <p style="color:#64748b;">تم تحديث حالة الطلب إلى "تم التسليم"</p>
-                    </div>
-                `;
-                // تحديث الواجهات
-                if (currentUser?.role === 'driver') {
-                    renderDriverOrders();
-                }
-            } else {
-                // التاجر/الصيدلي/الطباخ: تأكيد مطابقة القائمة
-                resultDiv.innerHTML = `
-                    <div style="background:#d1fae5; padding:15px; border-radius:10px; text-align:center;">
-                        <span style="font-size:2rem;">✅</span>
-                        <h4>تم التحقق من الباركود بنجاح!</h4>
-                        <p>الطلب: ${foundOrder.product || foundOrder.med || foundOrder.items || 'طلب'}</p>
-                        <p style="color:#64748b;">القائمة مطابقة، الطلب جاهز للتسليم</p>
-                        <button class="btn btn-success btn-sm" onclick="markOrderReady(${foundOrder.id}, '${role}')" style="margin-top:10px;">
-                            📦 تأكيد جاهزية الطلب
-                        </button>
-                    </div>
-                `;
-            }
-        } else {
-            resultDiv.innerHTML = `
-                <div style="background:#fee2e2; padding:15px; border-radius:10px; text-align:center;">
-                    <span style="font-size:2rem;">❌</span>
-                    <h4>الباركود غير مطابق!</h4>
-                    <p style="color:#64748b;">الرمز الممسوح لا يتطابق مع أي طلب في القائمة</p>
-                    <button class="btn btn-warning btn-sm" onclick="startScanner('${role}')" style="margin-top:10px;">
-                        📱 إعادة المسح
-                    </button>
-                </div>
-            `;
-        }
-    }
-
-    function markOrderReady(orderId, role) {
-        let order = null;
-        if (role === 'store') {
-            order = orders.find(o => o.id === orderId);
-        } else if (role === 'pharmacy') {
-            order = pharmacyOrders.find(o => o.id === orderId);
-        } else if (role === 'restaurant') {
-            order = restaurantOrders.find(o => o.id === orderId);
-        }
-        
-        if (order) {
-            order.status = CONFIRMED_STATUS;
-            alert('✅ تم تأكيد جاهزية الطلب للتوصيل');
-            // إعادة تحميل الواجهة المناسبة
-            if (role === 'store') renderStoreOrders();
-            else if (role === 'pharmacy') renderPharmacyOrders();
-            else if (role === 'restaurant') renderRestaurantOrders();
-            // إغلاق الماسح
-            closeScanner(role);
-        }
     }
 
     // ---------- لوحة التاجر ----------
     function showStoreDashboard() {
         document.getElementById('storeDashboard').classList.remove('hidden');
+        
+        // 👈 إظهار معلومات المتجر والمحلية
+        const storeInfo = document.getElementById('storeInfo');
+        if (storeInfo && currentUser && currentUser.address) {
+            const [state, locality] = currentUser.address.split('-');
+            storeInfo.innerHTML = `📍 المتجر: <strong>${currentUser.name}</strong> | المحلية: <strong>${locality || state}</strong>`;
+        }
+        
         renderStoreProducts();
         renderStoreOrders();
     }
@@ -957,12 +710,11 @@
                 id: Date.now(), 
                 product: p.name, 
                 qty: 1, 
-                address: currentUser?.address || 'الخرطوم-بحري',
-                locality: currentUser?.locality || 'بحري',
+                address: currentUser?.address || 'الخرطوم-بحري', 
                 status: 'جديد',
                 type: 'منتج',
-                store: p.store,
-                orderItems: p.name
+                storeId: 1,  // 👈 معرّف المتجر (المستخدم عندما يطلب عميل)
+                customerName: currentUser?.name || 'عميل'  // 👈 اسم العميل
             };
             orders.push(order);
             userOrders.push({...order, store: p.store});
@@ -976,43 +728,44 @@
 
     function renderStoreOrders() {
         const div = document.getElementById('storeOrders');
-        // تصفية الطلبات حسب محلية التاجر
-        const userLocality = currentUser?.locality || '';
-        const filteredOrders = orders.filter(o => o.locality === userLocality);
+        
+        // 👈 الحصول على المحلية من عنوان التاجر الحالي
+        const storeLocality = currentUser?.address?.split('-')[1] || '';
+        const storeId = currentUser?.storeId;
+        
+        // 👈 تصفية الطلبات - فقط من نفس المتجر وفي نفس المحلية
+        const filteredOrders = orders.filter(o => {
+            const customerLocality = o.address?.split('-')[1] || '';
+            return o.storeId === storeId && customerLocality === storeLocality;
+        });
         
         if (filteredOrders.length === 0) {
-            div.innerHTML = '<p style="color:#94a3b8;">لا توجد طلبات في محليتك</p>';
+            div.innerHTML = '<p style="color:#94a3b8;">❌ لا توجد طلبات من عملاء في نفس محليتك</p>';
             return;
         }
+        
         div.innerHTML = filteredOrders.map(o => `
             <div class="order-item">
                 <div class="flex-between">
-                    <strong>${o.product}</strong>
-                    <span class="badge ${o.status === CONFIRMED_STATUS ? 'badge-success' : ''}">${o.status}</span>
+                    <strong>📦 ${o.product}</strong>
+                    <span class="badge">${o.status}</span>
                 </div>
-                <div class="meta">الكمية: ${o.qty} | العنوان: ${o.address}${o.store ? ` | 🏪 ${o.store}` : ''}</div>
+                <div class="meta">👤 العميل: ${o.customerName || 'عميل'} | الكمية: ${o.qty} | العنوان: ${o.address}</div>
                 <div class="flex" style="margin-top:10px;">
-                    ${o.status === 'جديد' ? `
-                        <button class="btn btn-success" onclick="acceptOrder(${o.id})">✅ تأكيد الاستلام</button>
-                    ` : ''}
-                    ${o.status === CONFIRMED_STATUS ? `
-                        <span style="color:#2d7d46; font-weight:600;">✅ جاهز للاستلام من الموصل</span>
-                    ` : ''}
-                    <button class="btn btn-warning" onclick="startScanner('store', ${o.id})">📱 مسح الباركود</button>
+                    <button class="btn btn-success" onclick="acceptOrder(${o.id})">✅ تأكيد الاستلام</button>
+                    <button class="btn btn-warning" onclick="scanBarcode(${o.id})">📱 مسح الباركود</button>
                 </div>
             </div>
         `).join('');
     }
 
-    const CONFIRMED_STATUS = 'تم التأكيد - جاهز للاستلام';
-
     function acceptOrder(id) {
         const o = orders.find(x => x.id === id);
-        if (o) { 
-            o.status = CONFIRMED_STATUS; 
-            alert('✅ تم تأكيد الطلب، بانتظار استلام الموصل'); 
-            renderStoreOrders(); 
-        }
+        if (o) { o.status = 'تم التأكيد - جاهز للاستلام'; alert('✅ تم تأكيد الطلب، بانتظار استلام الموصل'); renderStoreOrders(); }
+    }
+
+    function scanBarcode(id) {
+        alert('📱 تم مسح الباركود ومقارنة القائمة بنجاح (محاكاة)');
     }
 
     function addProduct() {
@@ -1020,15 +773,7 @@
         const price = parseFloat(prompt('السعر'));
         const qty = parseInt(prompt('الكمية'));
         if (name && price && qty) {
-            products.push({ 
-                id: Date.now(), 
-                name, 
-                price, 
-                qty, 
-                store: currentUser?.name || 'متجر السوق',
-                address: currentUser?.address || 'الخرطوم-بحري',
-                locality: currentUser?.locality || 'بحري'
-            });
+            products.push({ id: Date.now(), name, price, qty, store: 'متجر السوق' });
             renderStoreProducts();
         }
     }
@@ -1036,34 +781,43 @@
     // ---------- الصيدلي ----------
     function showPharmacyDashboard() {
         document.getElementById('pharmacyDashboard').classList.remove('hidden');
+        
+        // إظهار معلومات الصيدلية والمحلية
+        const pharmacyInfo = document.getElementById('pharmacyInfo');
+        if (currentUser && currentUser.address) {
+            const [state, locality] = currentUser.address.split('-');
+            pharmacyInfo.innerHTML = `📍 الصيدلية: <strong>${currentUser.name}</strong> | المحلية: <strong>${locality || state}</strong>`;
+        }
+        
         renderPharmacyOrders();
     }
 
     function renderPharmacyOrders() {
         const div = document.getElementById('pharmacyOrders');
-        // تصفية الطلبات حسب محلية الصيدلي
-        const userLocality = currentUser?.locality || '';
-        const filteredOrders = pharmacyOrders.filter(o => o.locality === userLocality);
+        
+        // عنوان الصيدلي الحالي كاملاً (الولاية-المحلية)
+        const pharmacistAddress = (currentUser?.address || '').trim();
+        const pharmacistId = currentUser?.pharmacyId;
+        
+        // تصفية الطلبات - فقط من نفس الصيدلية (نفس العنوان بالكامل) وداخل نفس المحلية
+        const filteredOrders = pharmacyOrders.filter(o => {
+            return o.pharmacyId === pharmacistId && (o.address || '').trim() === pharmacistAddress;
+        });
         
         if (filteredOrders.length === 0) {
-            div.innerHTML = '<p style="color:#94a3b8;">لا توجد طلبات دواء في محليتك</p>';
+            div.innerHTML = '<p style="color:#94a3b8;">❌ لا توجد طلبات دواء من عملاء في نفس محليتك</p>';
             return;
         }
         div.innerHTML = filteredOrders.map(o => `
             <div class="order-item">
                 <div class="flex-between">
                     <strong>💊 ${o.med}</strong>
-                    <span class="badge ${o.status === CONFIRMED_STATUS ? 'badge-success' : ''}">${o.status}</span>
+                    <span class="badge">${o.status}</span>
                 </div>
-                <div class="meta">الروشتة: <a href="#" style="color:#2b6c94;">📎 عرض الملف</a> | العنوان: ${o.address}${o.pharmacy ? ` | 💊 ${o.pharmacy}` : ''}</div>
+                <div class="meta">👤 العميل: ${o.customerName || 'عميل'} | الروشتة: <a href="#" style="color:#2b6c94;">📎 عرض الملف</a> | العنوان: ${o.address}</div>
                 <div class="flex" style="margin-top:10px;">
-                    ${o.status === 'جديد' ? `
-                        <button class="btn btn-success" onclick="acceptPharmacyOrder(${o.id})">✅ تأكيد الاستلام</button>
-                    ` : ''}
-                    ${o.status === CONFIRMED_STATUS ? `
-                        <span style="color:#2d7d46; font-weight:600;">✅ جاهز للاستلام من الموصل</span>
-                    ` : ''}
-                    <button class="btn btn-warning" onclick="startScanner('pharmacy', ${o.id})">📱 مسح الباركود</button>
+                    <button class="btn btn-success" onclick="acceptPharmacyOrder(${o.id})">✅ تأكيد الاستلام</button>
+                    <button class="btn btn-warning" onclick="scanBarcode(${o.id})">📱 مسح الباركود</button>
                 </div>
             </div>
         `).join('');
@@ -1071,44 +825,51 @@
 
     function acceptPharmacyOrder(id) {
         const o = pharmacyOrders.find(x => x.id === id);
-        if (o) { 
-            o.status = CONFIRMED_STATUS; 
-            alert('✅ تم تأكيد الطلب، بانتظار استلام الموصل'); 
-            renderPharmacyOrders(); 
-        }
+        if (o) { o.status = 'تم التأكيد - جاهز للاستلام'; alert('✅ تم تأكيد الطلب، بانتظار استلام الموصل'); renderPharmacyOrders(); }
     }
 
     // ---------- الطباخ ----------
     function showRestaurantDashboard() {
         document.getElementById('restaurantDashboard').classList.remove('hidden');
+        
+        // 👈 إظهار معلومات المطعم والمحلية
+        const restaurantInfo = document.getElementById('restaurantInfo');
+        if (restaurantInfo && currentUser && currentUser.address) {
+            const [state, locality] = currentUser.address.split('-');
+            restaurantInfo.innerHTML = `📍 المطعم: <strong>${currentUser.name}</strong> | المحلية: <strong>${locality || state}</strong>`;
+        }
+        
         renderRestaurantOrders();
     }
 
     function renderRestaurantOrders() {
         const div = document.getElementById('restaurantOrders');
-        // تصفية الطلبات حسب محلية الطباخ
-        const userLocality = currentUser?.locality || '';
-        const filteredOrders = restaurantOrders.filter(o => o.locality === userLocality);
+        
+        // 👈 الحصول على المحلية من عنوان الطباخ الحالي
+        const restaurantLocality = currentUser?.address?.split('-')[1] || '';
+        const restaurantId = currentUser?.restaurantId;
+        
+        // 👈 تصفية الطلبات - فقط من نفس المطعم وفي نفس المحلية
+        const filteredOrders = restaurantOrders.filter(o => {
+            const customerLocality = o.address?.split('-')[1] || '';
+            return o.restaurantId === restaurantId && customerLocality === restaurantLocality;
+        });
         
         if (filteredOrders.length === 0) {
-            div.innerHTML = '<p style="color:#94a3b8;">لا توجد طلبات وجبات في محليتك</p>';
+            div.innerHTML = '<p style="color:#94a3b8;">❌ لا توجد طلبات وجبات من عملاء في نفس محليتك</p>';
             return;
         }
+        
         div.innerHTML = filteredOrders.map(o => `
             <div class="order-item">
                 <div class="flex-between">
                     <strong>🍽️ ${o.items}</strong>
-                    <span class="badge ${o.status === CONFIRMED_STATUS ? 'badge-success' : ''}">${o.status}</span>
+                    <span class="badge">${o.status}</span>
                 </div>
-                <div class="meta">العنوان: ${o.address}${o.restaurant ? ` | 🍽️ ${o.restaurant}` : ''}</div>
+                <div class="meta">👤 العميل: ${o.customerName || 'عميل'} | العنوان: ${o.address}</div>
                 <div class="flex" style="margin-top:10px;">
-                    ${o.status === 'جديد' ? `
-                        <button class="btn btn-success" onclick="acceptRestOrder(${o.id})">✅ تأكيد الاستلام</button>
-                    ` : ''}
-                    ${o.status === CONFIRMED_STATUS ? `
-                        <span style="color:#2d7d46; font-weight:600;">✅ جاهز للاستلام من الموصل</span>
-                    ` : ''}
-                    <button class="btn btn-warning" onclick="startScanner('restaurant', ${o.id})">📱 مسح الباركود</button>
+                    <button class="btn btn-success" onclick="acceptRestOrder(${o.id})">✅ تأكيد الاستلام</button>
+                    <button class="btn btn-warning" onclick="scanBarcode(${o.id})">📱 مسح الباركود</button>
                 </div>
             </div>
         `).join('');
@@ -1116,11 +877,7 @@
 
     function acceptRestOrder(id) {
         const o = restaurantOrders.find(x => x.id === id);
-        if (o) { 
-            o.status = CONFIRMED_STATUS; 
-            alert('✅ تم تأكيد الطلب، بانتظار استلام الموصل'); 
-            renderRestaurantOrders(); 
-        }
+        if (o) { o.status = 'تم التأكيد - جاهز للاستلام'; alert('✅ تم تأكيد الطلب، بانتظار استلام الموصل'); renderRestaurantOrders(); }
     }
 
     // ---------- الموصل ----------
@@ -1130,69 +887,191 @@
         initDriverMap();
     }
 
+    // الحالة التي تعني أن التاجر/الصيدلي/الطباخ أكد الطلب وأصبح جاهزاً لاستلام الموصل
+    const CONFIRMED_STATUS = 'تم التأكيد - جاهز للاستلام';
+    // الحد الأقصى لعدد الطلبات التي يمكن للموصل اختيارها دفعة واحدة من نفس العنوان
+    const MAX_ORDERS_PER_PICKUP = 3;
+    // مجموعة معرّفات الطلبات المحددة حالياً من قبل الموصل
+    let selectedDriverOrderIds = new Set();
+
+    // الحالة التي تعني أن الطلب تم تسليمه بنجاح للعميل
+    const DELIVERED_STATUS = 'تم التسليم';
+
+    function completeDelivery(id) {
+        let allOrders = [...orders, ...pharmacyOrders, ...restaurantOrders];
+        const order = allOrders.find(o => o.id === id);
+        if (order && order.status === 'قيد التوصيل') {
+            order.status = DELIVERED_STATUS;
+        }
+        alert('✅ تم تسليم الطلب بنجاح');
+        renderDriverOrders();
+    }
+
+    function completeCurrentTask() {
+        let allOrders = [...orders, ...pharmacyOrders, ...restaurantOrders];
+        const inProgress = allOrders.filter(o => o.status === 'قيد التوصيل');
+        if (inProgress.length === 0) return;
+        inProgress.forEach(o => o.status = DELIVERED_STATUS);
+        alert('✅ تم إنهاء المهمة وتسليم جميع الطلبات - يمكنك الآن اختيار طلبات جديدة');
+        renderDriverOrders();
+    }
+
+    function toggleOrderSelection(id, checked) {
+        let allOrders = [...orders, ...pharmacyOrders, ...restaurantOrders];
+        const order = allOrders.find(o => o.id === id);
+        if (!order) return;
+
+        if (checked) {
+            // منع تجاوز الحد الأقصى المسموح به من الطلبات في الدفعة الواحدة
+            if (selectedDriverOrderIds.size >= MAX_ORDERS_PER_PICKUP) {
+                alert(`⚠️ لا يمكنك اختيار أكثر من ${MAX_ORDERS_PER_PICKUP} طلبات دفعة واحدة`);
+                renderDriverOrders();
+                return;
+            }
+            // التأكد أن كل الطلبات المحددة من نفس العنوان
+            const firstSelectedId = [...selectedDriverOrderIds][0];
+            if (firstSelectedId !== undefined) {
+                const firstOrder = allOrders.find(o => o.id === firstSelectedId);
+                if (firstOrder && firstOrder.address !== order.address) {
+                    alert('⚠️ يمكنك اختيار طلبات من نفس العنوان فقط في الدفعة الواحدة');
+                    renderDriverOrders();
+                    return;
+                }
+            }
+            selectedDriverOrderIds.add(id);
+        } else {
+            selectedDriverOrderIds.delete(id);
+        }
+        updateDriverSelectionBar();
+    }
+
+    function updateDriverSelectionBar() {
+        const bar = document.getElementById('driverSelectionBar');
+        if (!bar) return;
+        const count = selectedDriverOrderIds.size;
+        if (count === 0) {
+            bar.innerHTML = '';
+            return;
+        }
+        let allOrders = [...orders, ...pharmacyOrders, ...restaurantOrders];
+        const firstOrder = allOrders.find(o => o.id === [...selectedDriverOrderIds][0]);
+        const address = firstOrder ? firstOrder.address : '';
+        const ready = count >= 1;
+        bar.innerHTML = `
+            <div class="order-item" style="border:2px dashed ${ready ? '#16a34a' : '#f59e0b'};">
+                <div class="flex-between">
+                    <strong>📦 محدد: ${count} من ${MAX_ORDERS_PER_PICKUP} طلبات من عنوان ${address}</strong>
+                </div>
+                <div class="meta">${count >= MAX_ORDERS_PER_PICKUP ? '✅ وصلت للحد الأقصى المسموح به دفعة واحدة' : `يمكنك اختيار حتى ${MAX_ORDERS_PER_PICKUP - count} طلبات إضافية من نفس العنوان`}</div>
+                <div class="flex" style="margin-top:10px;">
+                    <button class="btn btn-success" ${ready ? '' : 'disabled'} onclick="acceptSelectedDeliveries()">📦 تأكيد استلام الطلبات المحددة</button>
+                    <button class="btn" onclick="clearDriverSelection()">إلغاء التحديد</button>
+                </div>
+            </div>
+        `;
+    }
+
+    function clearDriverSelection() {
+        selectedDriverOrderIds.clear();
+        renderDriverOrders();
+    }
+
+    function acceptSelectedDeliveries() {
+        let allOrders0 = [...orders, ...pharmacyOrders, ...restaurantOrders];
+        if (allOrders0.some(o => o.status === 'قيد التوصيل')) {
+            alert('⚠️ يجب إنهاء المهمة الحالية أولاً قبل استلام طلبات جديدة');
+            return;
+        }
+        if (selectedDriverOrderIds.size < 1) {
+            alert('⚠️ يجب اختيار طلب واحد على الأقل قبل تأكيد الاستلام');
+            return;
+        }
+        if (selectedDriverOrderIds.size > MAX_ORDERS_PER_PICKUP) {
+            alert(`⚠️ لا يمكن استلام أكثر من ${MAX_ORDERS_PER_PICKUP} طلبات دفعة واحدة`);
+            return;
+        }
+        let allOrders = [...orders, ...pharmacyOrders, ...restaurantOrders];
+        const address = allOrders.find(o => o.id === [...selectedDriverOrderIds][0])?.address;
+        const allSameAddress = [...selectedDriverOrderIds].every(id => {
+            const o = allOrders.find(x => x.id === id);
+            return o && o.address === address;
+        });
+        if (!allSameAddress) {
+            alert('⚠️ الطلبات المحددة ليست كلها من نفس العنوان');
+            return;
+        }
+        selectedDriverOrderIds.forEach(id => {
+            const o = allOrders.find(x => x.id === id);
+            if (o && o.status === CONFIRMED_STATUS) o.status = 'قيد التوصيل';
+        });
+        selectedDriverOrderIds.clear();
+        alert('✅ تم استلام الطلبات للتوصيل دفعة واحدة - تم إنشاء باركود لكل طلب');
+        renderDriverOrders();
+    }
+
     function renderDriverOrders() {
         const div = document.getElementById('driverOrders');
-        // الموصل يرى الطلبات التي تم تأكيدها في محليته
-        const userLocality = currentUser?.locality || '';
+        // الموصل يرى فقط الطلبات التي تم تأكيدها من التاجر/الصيدلي/الطباخ
+        // (أو التي استلمها هو مسبقاً وهي الآن قيد التوصيل) - الطلبات المسلّمة لا تظهر بعد الآن
         let allOrders = [...orders, ...pharmacyOrders, ...restaurantOrders]
-            .filter(o => o.locality === userLocality && 
-                   (o.status === CONFIRMED_STATUS || o.status === 'قيد التوصيل' || o.status === 'تم التسليم'));
+            .filter(o => o.status === CONFIRMED_STATUS || o.status === 'قيد التوصيل');
 
         if (allOrders.length === 0) {
-            div.innerHTML = '<p style="color:#94a3b8;">لا توجد طلبات جاهزة للاستلام في محليتك</p>';
+            div.innerHTML = '<p style="color:#94a3b8;">لا توجد طلبات جاهزة للاستلام حالياً</p><div id="driverSelectionBar"></div>';
+            selectedDriverOrderIds.clear();
             return;
         }
 
-        div.innerHTML = allOrders.map(o => {
-            const isDelivered = o.status === 'تم التسليم';
-            const isInDelivery = o.status === 'قيد التوصيل';
-            const isReady = o.status === CONFIRMED_STATUS;
-            
-            return `
-                <div class="order-item" style="${isDelivered ? 'border-right-color: #2d7d46; opacity: 0.7;' : ''}">
+        const inProgressCount = allOrders.filter(o => o.status === 'قيد التوصيل').length;
+        const taskBar = inProgressCount > 0
+            ? `<div class="order-item" style="border:2px dashed #2563eb;">
                     <div class="flex-between">
-                        <strong>${o.product || o.med || o.items || 'طلب'}</strong>
-                        <span class="badge ${isDelivered ? 'badge-success' : isInDelivery ? 'badge-warning' : ''}">${o.status}</span>
+                        <strong>🚚 مهمة توصيل حالية: ${inProgressCount} طلب قيد التوصيل</strong>
                     </div>
-                    <div class="meta">العنوان: ${o.address}</div>
-                    ${isInDelivery ? `
-                        <div class="barcode-box">
-                            <svg id="barcode-${o.id}"></svg>
-                            <div class="barcode-label">رمز الطلب: ${o.id}</div>
-                            <p style="font-size:12px; color:#64748b; margin-top:5px;">
-                                ${o.product || o.med || o.items || 'طلب'} | ${o.address}
-                            </p>
-                            <button class="btn btn-success btn-sm" onclick="startScanner('driver', ${o.id})" style="margin-top:10px;">
-                                📱 مسح باركود التسليم
-                            </button>
-                        </div>
-                    ` : isReady ? `
-                        <button class="btn btn-success" onclick="acceptDelivery(${o.id})">📦 استلام الطلب</button>
-                    ` : isDelivered ? `
-                        <span style="color:#2d7d46; font-weight:600;">✅ تم التسليم</span>
-                    ` : ''}
-                </div>
-            `;
-        }).join('');
+                    <div class="meta">بعد تسليم الطلبات للعملاء، اضغط الزر أدناه لإنهاء المهمة والعودة لاختيار طلبات جديدة</div>
+                    <div class="flex" style="margin-top:10px;">
+                        <button class="btn btn-success" onclick="completeCurrentTask()">✅ إنهاء المهمة والعودة للقائمة</button>
+                    </div>
+                </div>`
+            : '';
 
-        // رسم باركود لكل طلب قيد التوصيل
+        div.innerHTML = taskBar + (inProgressCount > 0
+            ? `<p style="color:#94a3b8; font-size:0.9rem;">🔒 أنهِ المهمة الحالية أولاً لتتمكن من اختيار طلبات جديدة</p>`
+            : `<p style="color:#64748b; font-size:0.9rem;">ℹ️ يمكنك اختيار حتى ${MAX_ORDERS_PER_PICKUP} طلبات كحد أقصى من نفس العنوان لاستلامها دفعة واحدة</p>`
+        ) + allOrders.map(o => `
+            <div class="order-item">
+                <div class="flex-between">
+                    <strong>${o.status === CONFIRMED_STATUS ? `<input type="checkbox" onchange="toggleOrderSelection(${o.id}, this.checked)" ${selectedDriverOrderIds.has(o.id) ? 'checked' : ''} ${(inProgressCount > 0 || (!selectedDriverOrderIds.has(o.id) && selectedDriverOrderIds.size >= MAX_ORDERS_PER_PICKUP)) ? 'disabled' : ''} style="margin-left:8px;">` : ''}${o.product || o.med || o.items || 'طلب'}</strong>
+                    <span class="badge">${o.status || 'جديد'}</span>
+                </div>
+                <div class="meta">العنوان: ${o.address}</div>
+                ${o.status === 'قيد التوصيل'
+                    ? `<div class="barcode-box">
+                           <svg id="barcode-${o.id}"></svg>
+                           <div class="barcode-label">رمز الطلب: ${o.id}</div>
+                       </div>
+                       <div class="flex" style="margin-top:10px;">
+                           <button class="btn btn-success" onclick="completeDelivery(${o.id})">✅ تم تسليم هذا الطلب</button>
+                       </div>`
+                    : ''
+                }
+            </div>
+        `).join('') + `<div id="driverSelectionBar"></div>`;
+
+        updateDriverSelectionBar();
+
+        // رسم باركود لكل طلب تم استلامه من الموصل
         allOrders.forEach(o => {
             if (o.status === 'قيد التوصيل') {
                 const el = document.getElementById(`barcode-${o.id}`);
                 if (el && window.JsBarcode) {
-                    try {
-                        // توليد باركود يحتوي على قائمة الطعام المشفرة
-                        const barcodeData = generateOrderBarcode(o);
-                        JsBarcode(el, barcodeData, {
-                            format: 'CODE128',
-                            width: 2,
-                            height: 50,
-                            displayValue: false,
-                            margin: 5
-                        });
-                    } catch (e) {
-                        console.error('Error generating barcode:', e);
-                    }
+                    JsBarcode(el, String(o.id), {
+                        format: 'CODE128',
+                        width: 2,
+                        height: 50,
+                        displayValue: false,
+                        margin: 5
+                    });
                 }
             }
         });
@@ -1203,11 +1082,9 @@
         const order = allOrders.find(o => o.id === id);
         if (order && order.status === CONFIRMED_STATUS) {
             order.status = 'قيد التوصيل';
-            alert('✅ تم استلام الطلب للتوصيل - تم إنشاء باركود الطلب');
-            renderDriverOrders();
-        } else {
-            alert('⚠️ هذا الطلب غير جاهز للاستلام');
         }
+        alert('✅ تم استلام الطلب للتوصيل - تم إنشاء باركود الطلب');
+        renderDriverOrders();
     }
 
     function initDriverMap() {
@@ -1217,7 +1094,7 @@
         L.marker([15.5, 32.5]).addTo(mapInstance).bindPopup('📍 موقع السائق');
     }
 
-    // ---------- المستخدم ----------
+    // ---------- المستخدم (العميل) ----------
     function showUserDashboard() {
         document.getElementById('userDashboard').classList.remove('hidden');
         renderUserStores();
@@ -1229,20 +1106,17 @@
 
     function renderUserStores() {
         const div = document.getElementById('userStores');
-        const myLocality = currentUser?.locality || '';
-        const list = products.filter(p => p.locality === myLocality);
-        if (list.length === 0) {
-            div.innerHTML = `<p style="color:#94a3b8;">لا توجد متاجر في محليتك (${myLocality || ''})</p>`;
+        if (products.length === 0) {
+            div.innerHTML = '<p style="color:#94a3b8;">لا توجد متاجر قريبة</p>';
             return;
         }
-        div.innerHTML = list.map(p => `
+        div.innerHTML = products.map(p => `
             <div class="store-card">
                 <div class="flex-between">
                     <h4>${p.name}</h4>
                     <span class="badge">${p.store || 'متجر'}</span>
                 </div>
                 <p>💰 ${p.price} ج.س | 📦 ${p.qty} متبقية</p>
-                <p style="font-size:13px;color:#64748b;">📍 ${p.address}</p>
                 <button class="btn btn-success" onclick="userOrderProduct(${p.id})" style="margin-top:5px;">🛒 طلب</button>
             </div>
         `).join('');
@@ -1257,11 +1131,10 @@
                 product: p.name,
                 qty: 1,
                 address: currentUser?.address || 'الخرطوم-بحري',
-                locality: currentUser?.locality || 'بحري',
                 status: 'جديد',
                 type: 'منتج',
-                store: p.store || 'متجر',
-                orderItems: p.name
+                storeId: 1,  // 👈 معرّف المتجر
+                customerName: currentUser?.name || 'عميل'  // 👈 اسم العميل
             };
             orders.push(order);
             userOrders.push(order);
@@ -1275,13 +1148,11 @@
 
     function renderUserPharmacies() {
         const div = document.getElementById('userPharmacies');
-        const myLocality = currentUser?.locality || '';
-        const list = pharmacies.filter(ph => ph.locality === myLocality);
-        if (list.length === 0) {
-            div.innerHTML = `<p style="color:#94a3b8;">لا توجد صيدليات في محليتك (${myLocality || ''})</p>`;
+        if (pharmacies.length === 0) {
+            div.innerHTML = '<p style="color:#94a3b8;">لا توجد صيدليات قريبة</p>';
             return;
         }
-        div.innerHTML = list.map(ph => `
+        div.innerHTML = pharmacies.map(ph => `
             <div class="store-card">
                 <h4>💊 ${ph.name}</h4>
                 <p>📍 ${ph.address}</p>
@@ -1297,13 +1168,12 @@
             const order = {
                 id: Date.now(),
                 med: med,
-                address: currentUser?.address || 'الخرطوم-أم درمان',
-                locality: currentUser?.locality || 'أم درمان',
+                address: currentUser?.address || 'الخرطوم-بحري',
                 status: 'جديد',
                 type: 'دواء',
                 pharmacy: ph ? ph.name : 'صيدلية',
                 pharmacyId: pharmacyId,
-                orderItems: med
+                customerName: currentUser?.name || 'عميل'
             };
             pharmacyOrders.push(order);
             userOrders.push({...order, med: med, name: med});
@@ -1314,13 +1184,11 @@
 
     function renderUserRestaurants() {
         const div = document.getElementById('userRestaurants');
-        const myLocality = currentUser?.locality || '';
-        const list = restaurants.filter(r => r.locality === myLocality);
-        if (list.length === 0) {
-            div.innerHTML = `<p style="color:#94a3b8;">لا توجد مطاعم في محليتك (${myLocality || ''})</p>`;
+        if (restaurants.length === 0) {
+            div.innerHTML = '<p style="color:#94a3b8;">لا توجد مطاعم قريبة</p>';
             return;
         }
-        div.innerHTML = list.map(r => `
+        div.innerHTML = restaurants.map(r => `
             <div class="store-card" style="display:inline-block; width:48%; margin:5px;">
                 <h4>🍽️ ${r.name}</h4>
                 <p>📍 ${r.address}</p>
@@ -1336,13 +1204,11 @@
             const order = {
                 id: Date.now(),
                 items: items,
-                address: currentUser?.address || 'الخرطوم-الخرطوم',
-                locality: currentUser?.locality || 'الخرطوم',
+                address: currentUser?.address || 'الخرطوم-بحري',
                 status: 'جديد',
                 type: 'وجبة',
-                restaurant: r ? r.name : 'مطعم',
-                restaurantId: restaurantId,
-                orderItems: items
+                restaurantId: restaurantId,  // 👈 معرّف المطعم
+                customerName: currentUser?.name || 'عميل'  // 👈 اسم العميل
             };
             restaurantOrders.push(order);
             userOrders.push({...order, items: items, name: items});
@@ -1361,36 +1227,11 @@
             <div class="order-item">
                 <div class="flex-between">
                     <strong>${o.product || o.med || o.items || 'طلب'}</strong>
-                    <span class="badge ${o.status === 'تم التسليم' ? 'badge-success' : o.status === 'قيد التوصيل' ? 'badge-warning' : ''}">${o.status || 'جديد'}</span>
+                    <span class="badge ${o.status === 'تم التسليم' ? 'badge-success' : ''}">${o.status || 'جديد'}</span>
                 </div>
                 <div class="meta">النوع: ${o.type || 'عام'} | العنوان: ${o.address}</div>
-                ${o.status === 'قيد التوصيل' ? `
-                    <div class="barcode-box">
-                        <svg id="ubarcode-${o.id}"></svg>
-                        <div class="barcode-label">رمز التتبع: ${o.id}</div>
-                    </div>
-                ` : ''}
             </div>
         `).join('');
-
-        // رسم باركود لطلبات المستخدم قيد التوصيل
-        userOrders.forEach(o => {
-            if (o.status === 'قيد التوصيل') {
-                const el = document.getElementById(`ubarcode-${o.id}`);
-                if (el && window.JsBarcode) {
-                    try {
-                        const barcodeData = generateOrderBarcode(o);
-                        JsBarcode(el, barcodeData, {
-                            format: 'CODE128',
-                            width: 2,
-                            height: 50,
-                            displayValue: false,
-                            margin: 5
-                        });
-                    } catch (e) {}
-                }
-            }
-        });
     }
 
     function initUserMap() {
@@ -1404,54 +1245,12 @@
     // ---------- بيانات تجريبية ----------
     setTimeout(() => {
         if (pharmacyOrders.length === 0) {
-            pharmacyOrders.push({ 
-                id: 101, 
-                med: 'بنادول', 
-                address: 'الخرطوم-بحري', 
-                locality: 'بحري',
-                status: 'جديد',
-                orderItems: 'بنادول'
-            });
-            pharmacyOrders.push({ 
-                id: 102, 
-                med: 'أموكسيسيلين', 
-                address: 'الخرطوم-أم درمان', 
-                locality: 'أم درمان',
-                status: 'جديد',
-                orderItems: 'أموكسيسيلين'
-            });
+            pharmacyOrders.push({ id: 101, med: 'بنادول', address: 'الخرطوم-بحري', status: 'جديد' });
+            pharmacyOrders.push({ id: 102, med: 'أموكسيسيلين', address: 'الخرطوم-أم درمان', status: 'جديد' });
         }
         if (restaurantOrders.length === 0) {
-            restaurantOrders.push({ 
-                id: 201, 
-                items: 'شاورما دجاج + عصير برتقال', 
-                address: 'الخرطوم-الخرطوم', 
-                locality: 'الخرطوم',
-                status: 'جديد',
-                orderItems: 'شاورما دجاج + عصير برتقال'
-            });
-            restaurantOrders.push({ 
-                id: 202, 
-                items: 'فلافل + طحينة + عصير', 
-                address: 'الخرطوم-بحري', 
-                locality: 'بحري',
-                status: 'جديد',
-                orderItems: 'فلافل + طحينة + عصير'
-            });
-        }
-        // إضافة طلبات للمتجر
-        if (orders.length === 0) {
-            orders.push({
-                id: 301,
-                product: 'هاتف ذكي',
-                qty: 1,
-                address: 'الخرطوم-بحري',
-                locality: 'بحري',
-                status: 'جديد',
-                type: 'منتج',
-                store: 'متجر السوق',
-                orderItems: 'هاتف ذكي'
-            });
+            restaurantOrders.push({ id: 201, items: 'شاورما دجاج + عصير برتقال', address: 'الخرطوم-الخرطوم', status: 'جديد' });
+            restaurantOrders.push({ id: 202, items: 'فلافل + طحينة + عصير', address: 'الخرطوم-بحري', status: 'جديد' });
         }
     }, 500);
 </script>
